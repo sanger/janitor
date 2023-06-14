@@ -1,21 +1,38 @@
-import mysql.connector
+import mysql.connector as mysql
 from typing import List, Dict
 
 
 class Database:
-    def __init__(self, host: str, db_name: str, username: str):
-        """Create a MySQL connection to read and write data to tables in a database.
+    def __init__(
+        self, host: str, port: int, db_name: str, username: str, password: str
+    ):
+        """Open a MySQL connection to read and write data to tables in a database.
 
         Arguments:
             host {str}: host name for connection
+            port {int}: port to connect to
             db_name {str}: name of database
             username {str}: username for connection
+            password {str}: password for connection
         """
-        self.connection = mysql.connector.connect(
-            host=host, database=db_name, user=username
-        )
+        self.connection = mysql.connect(host=host, database=db_name, user=username)
 
         self.cursor = self.connection.cursor()
+
+    @classmethod
+    def create_connection(
+        cls, host: str, port: int, db_name: str, username: str, password: str
+    ) -> "Database":
+        """Create a MySQL connection to a database.
+
+        Arguments:
+            host {str}: host name for connection
+            port {int}: port to connect to
+            db_name {str}: name of database
+            username {str}: username for connection
+            password {str}: password for connection
+        """
+        return cls(host, port, db_name, username, password)
 
     def close(self) -> None:
         """Close connection to database."""

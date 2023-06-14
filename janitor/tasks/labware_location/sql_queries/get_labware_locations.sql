@@ -29,4 +29,5 @@ LEFT JOIN audits audits_b ON
 	AND audits.id < audits_b.id
 WHERE
 	audits_b.updated_at IS NULL
-	-- AND audits.updated_at > NOW() - INTERVAL 15 MINUTE
+LIMIT 10
+	-- AND audits.updated_at > NOW() - INTERVAL 305 SECOND

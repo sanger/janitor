@@ -1,6 +1,7 @@
 from os import path
-from database import Database
-from db_helpers import load_query, sort_results
+from janitor.db.database import Database
+from janitor.helpers.mysql_helpers import load_query
+from janitor.helpers.mlwh_helpers import sort_results
 
 wd = path.realpath(path.dirname(__file__))
 
@@ -9,6 +10,7 @@ add_to_labware_locations_file = "write_to_labware_locations.sql"
 
 labwhere = {
     "host": "localhost",
+    "port": 3000,
     "db_name": "labwhere_prod",
     "username": "root",
     "password": "",
@@ -16,23 +18,28 @@ labwhere = {
 
 mlwh = {
     "host": "localhost",
+    "port": 3000,
     "db_name": "unified_warehouse_development",
     "username": "root",
     "password": "",
 }
 
 
-if __name__ == "__main__":
-    db_labwhere = Database(
+def sync_changes_from_labwhere():
+    db_labwhere = Database.create_connection(
         host=labwhere["host"],
+        port=labwhere["port"],
         db_name=labwhere["db_name"],
         username=labwhere["username"],
+        password=labwhere["password"],
     )
 
-    db_mlwh = Database(
+    db_mlwh = Database.create_connection(
         host=mlwh["host"],
+        port=mlwh["port"],
         db_name=mlwh["db_name"],
         username=mlwh["username"],
+        password=mlwh["password"],
     )
 
     results = db_labwhere.execute_query(
@@ -48,9 +55,6 @@ if __name__ == "__main__":
         mlwh_entries,
         5000,
     )
-
-    print(f"\nNumber of bad entries: {len(invalid_entries)}")
-    print(invalid_entries)
 
     db_labwhere.close()
     db_mlwh.close()

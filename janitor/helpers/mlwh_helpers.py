@@ -1,38 +1,13 @@
-import datetime
+from datetime import datetime
 from typing import List, Dict
+from janitor.helpers.mysql_helpers import parse_result
 
 
-def load_query(filepath: str) -> str:
-    """Load query from .sql file.
-
-    Arguments:
-        filepath {str}: filepath to .sql file with query
-
-    Returns:
-        {str}: SQL query from .sql file
-    """
-    with open(filepath, "r") as query:
-        return query.read()
-
-
-def parse_result(result: List, column_names: List[str]) -> Dict[str, str | int]:
-    """Parse result into dictionary form for easier indexing.
-
-    Arguments:
-        result {List}: data to assign column names to
-        column_names {List[str]}: list of column names corresponding to results
-
-    Returns:
-        {Dict[str, str | int]}: dictionary of column names and corresponding data
-    """
-    return dict(zip(column_names, result))
-
-
-def make_mlwh_entry(entry: Dict[str, str | int]):
+def make_mlwh_entry(entry: Dict[str, str]):
     """Make MLWH entry from results to write to table.
 
     Arguments:
-        entry {Dict[str, str | int]}: parsed entry to write to table
+        entry {Dict[str, str]}: parsed entry to write to table
 
     Returns:
         {List}: entry to write to MLWH table
@@ -46,8 +21,8 @@ def make_mlwh_entry(entry: Dict[str, str | int]):
     lims_id = "LabWhere"
     stored_by = entry["stored_by"]
     stored_at = entry["stored_at"]
-    created_at = datetime.datetime.utcnow().isoformat(sep=" ", timespec="seconds")
-    updated_at = datetime.datetime.utcnow().isoformat(sep=" ", timespec="seconds")
+    created_at = datetime.utcnow().isoformat(sep=" ", timespec="seconds")
+    updated_at = datetime.utcnow().isoformat(sep=" ", timespec="seconds")
 
     if entry["ordered_barcode"] is not None:
         location_barcode = entry["ordered_barcode"]
