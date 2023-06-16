@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Any, cast
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.types import LabwareLabwhereEntry, LabwareMLWHEntry
 
@@ -59,12 +59,12 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
 
 
 def sort_results(
-    entries: List[LabwareLabwhereEntry],
+    entries: List[Any],
 ) -> tuple:
     """Sort results to add to table and filter out entries missing location.
 
     Arguments:
-        entries {List[LabwareLabwhereEntry]}: entries to sort
+        entries {List[Dict[str, Any]]}: entries to sort
 
     Returns:
         mlwh_entries {List[LabwareMLWHEntry]}: entries to add to MLWH table
@@ -80,6 +80,8 @@ def sort_results(
         ):
             invalid_entries.append(result_dict)
         else:
-            mlwh_entries.append(make_mlwh_entry(result_dict))
+            mlwh_entries.append(
+                make_mlwh_entry(cast(LabwareLabwhereEntry, result_dict))
+            )
 
     return mlwh_entries, invalid_entries
