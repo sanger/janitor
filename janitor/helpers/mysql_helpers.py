@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
 def load_query(filepath: str) -> str:
@@ -14,14 +14,28 @@ def load_query(filepath: str) -> str:
         return query.read()
 
 
-def parse_result(result: List, column_names: List[str]) -> Dict[str, str]:
-    """Parse result into dictionary form for easier indexing.
+def parse_entry(entry: List[Any], column_names: List[str]) -> Dict[str, Any]:
+    """Parse entry into dictionary form for easier indexing.
 
     Arguments:
-        result {List}: data to assign column names to
+        entry {List[Any]}: data to assign column names to
         column_names {List[str]}: list of column names corresponding to results
 
     Returns:
-        {Dict[str, str]}: dictionary of column names and corresponding data
+        {Dict[str, Any]}: dictionary of column names and corresponding data
     """
-    return dict(zip(column_names, result))
+    return dict(zip(column_names, entry))
+
+
+def list_of_entries_values(entries: List[Dict[str, Any]]) -> List[List[Any]]:
+    """
+    Unpack the values of parsed entry dictionaries in a batch of entries.
+
+    Arguments:
+        entries {List[Dict[str, Any]]}: entries to be unpacked
+
+    Returns:
+        values {List[List[Any]]}: list of unpacked entries
+    """
+    values = [list(entry.values()) for entry in entries]
+    return values
