@@ -1,5 +1,6 @@
 import mysql.connector as mysql
-from typing import List, Dict, Any
+from mysql.connector.connection_cext import MySQLConnectionAbstract
+from typing import List, Dict, Any, Sequence, cast
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
 
@@ -11,9 +12,10 @@ class Database:
         Arguments:
             creds {DbConnectionDetails}: details for database connection
         """
-        self.connection = mysql.connect(
+        connection = mysql.connect(
             host=creds["host"], database=creds["db_name"], user=creds["username"]
         )
+        self.connection = cast(MySQLConnectionAbstract, connection)
 
         self.cursor = self.connection.cursor()
 
@@ -23,12 +25,12 @@ class Database:
             self.connection.close()
             self.cursor.close()
 
-    def execute_query(self, query: str, params: Dict[str, str] = None) -> List[Any]:
+    def execute_query(self, query: str, params: Dict[str, str]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
 
         Arguments:
             query {str}: SQL query to execute against table
-            params {Dict[str, str]}: Optional parameters to inject to SQL query
+            params {Dict[str, str]}: Additional parameters to inject to SQL query
 
         Returns:
             results {List[Any]}: list of queried results
