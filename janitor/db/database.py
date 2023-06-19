@@ -23,16 +23,17 @@ class Database:
             self.connection.close()
             self.cursor.close()
 
-    def execute_query(self, query: str) -> List[Any]:
+    def execute_query(self, query: str, params: Dict[str, str] = None) -> List[Any]:
         """Execute an SQL query and return the results and column names.
 
         Arguments:
             query {str}: SQL query to execute against table
+            params {Dict[str, str]}: Optional parameters to inject to SQL query
 
         Returns:
             results {List[Any]}: list of queried results
         """
-        self.cursor.execute(query)
+        self.cursor.execute(query, params)
         results = self.cursor.fetchall()
         return results
 
