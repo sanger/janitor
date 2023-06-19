@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Any, cast
+from typing import Sequence, Any, cast
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.types import LabwareLabwhereEntry, LabwareMLWHEntry
 
@@ -59,7 +59,7 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
 
 
 def sort_results(
-    entries: List[Any],
+    entries: Sequence[Any],
 ) -> tuple:
     """Sort results to add to table and filter out entries missing location.
 
