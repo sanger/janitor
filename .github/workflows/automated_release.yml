@@ -9,11 +9,11 @@ on:
 env:
   IMAGE_NAME: ${{ github.repository }}/${{ github.event.repository.name }}
 
-permissions:
-  packages: write
-
 jobs:
   build_test_release_push:
+    permissions: 
+      packages: write
+      deployments: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
