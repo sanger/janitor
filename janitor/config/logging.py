@@ -22,5 +22,10 @@ LOGGING: Dict[str, Any] = {
             "level": "INFO",
             "propagate": True,
         },
+        "apscheduler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
     },
 }
