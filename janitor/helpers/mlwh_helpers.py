@@ -64,7 +64,7 @@ def sort_results(
     """Sort results to add to table and filter out entries missing location.
 
     Arguments:
-        entries {List[Dict[str, Any]]}: entries to sort
+        entries {Sequence[Any]}: entries to sort
 
     Returns:
         mlwh_entries {List[LabwareMLWHEntry]}: entries to add to MLWH table
