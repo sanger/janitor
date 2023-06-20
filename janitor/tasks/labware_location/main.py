@@ -1,4 +1,5 @@
 import logging
+import time
 from os import path
 from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import load_query
@@ -18,6 +19,8 @@ WRITE_TO_LABWARE_LOCATIONS_FILE = "write_to_labware_locations.sql"
 
 
 def sync_changes_from_labwhere():
+    start = time.time()
+    logger.info("Starting sync labware locations task...")
     db_labwhere = Database(LABWHERE_DB)
     db_mlwh = Database(MLWH_DB)
 
@@ -30,8 +33,9 @@ def sync_changes_from_labwhere():
 
     if invalid_entries:
         for entry in invalid_entries:
-            logger.warning(f"Found invalid entry: {entry}")
+            logger.error(f"Found invalid entry: {entry}")
 
+    logger.info(f"Updating {len(mlwh_entries)} rows...")
     db_mlwh.write_entries_to_table(
         load_query(path.join(wd, "sql_queries", WRITE_TO_LABWARE_LOCATIONS_FILE)),
         mlwh_entries,
@@ -40,3 +44,4 @@ def sync_changes_from_labwhere():
 
     db_labwhere.close()
     db_mlwh.close()
+    logger.info(f"Task complete in {round(time.time() - start, 2)}s")

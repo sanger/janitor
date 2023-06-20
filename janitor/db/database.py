@@ -1,8 +1,12 @@
+import logging
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
 from typing import List, Dict, Any, Sequence, cast
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
+
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -35,6 +39,7 @@ class Database:
         Returns:
             results {List[Any]}: list of queried results
         """
+        logger.info(f"Executing query: {query}")
         self.cursor.execute(query, params)
         results = self.cursor.fetchall()
         return results
