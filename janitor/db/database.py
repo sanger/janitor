@@ -13,7 +13,11 @@ class Database:
             creds {DbConnectionDetails}: details for database connection
         """
         connection = mysql.connect(
-            host=creds["host"], database=creds["db_name"], user=creds["username"]
+            host=creds["host"],
+            port=creds["port"],
+            database=creds["db_name"],
+            username=creds["username"],
+            password=creds["password"],
         )
         self.connection = cast(MySQLConnectionAbstract, connection)
 
