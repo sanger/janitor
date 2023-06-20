@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 apscheduler = "~=3.10"
 mysql-connector-python = "~=8.0"
-colorlog = "*"
+python-dotenv = "~=1.0"
 
 [dev-packages]
 black = "*"

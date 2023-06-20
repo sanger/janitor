@@ -4,12 +4,9 @@ from os import path
 from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import load_query
 from janitor.helpers.mlwh_helpers import sort_results
-from janitor.config.defaults import (
-    LABWHERE_DB,
-    MLWH_DB,
-    SYNC_JOB_INTERVAL_SEC,
-    SYNC_JOB_OVERLAP_SEC,
-)
+from janitor.helpers.config_helpers import get_config
+
+config = get_config()
 
 wd = path.realpath(path.dirname(__file__))
 logger = logging.getLogger(__name__)
@@ -21,12 +18,12 @@ WRITE_TO_LABWARE_LOCATIONS_FILE = "write_to_labware_locations.sql"
 def sync_changes_from_labwhere():
     start = time.time()
     logger.info("Starting sync labware locations task...")
-    db_labwhere = Database(LABWHERE_DB)
-    db_mlwh = Database(MLWH_DB)
+    db_labwhere = Database(config.LABWHERE_DB)
+    db_mlwh = Database(config.MLWH_DB)
 
     results = db_labwhere.execute_query(
         load_query(path.join(wd, "sql_queries", GET_LOCATIONS_FILE)),
-        {"interval": str(SYNC_JOB_INTERVAL_SEC + SYNC_JOB_OVERLAP_SEC)},
+        {"interval": str(config.SYNC_JOB_INTERVAL_SEC + config.SYNC_JOB_OVERLAP_SEC)},
     )
 
     mlwh_entries, invalid_entries = sort_results(results)
