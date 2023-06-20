@@ -77,6 +77,7 @@ def sort_results(
         if (
             result_dict["unordered_barcode"] is None
             and result_dict["ordered_barcode"] is None
+            or result_dict["stored_by"] is None
         ):
             invalid_entries.append(result_dict)
         else:
