@@ -1,9 +1,6 @@
 import os
 from importlib import import_module
 from types import ModuleType
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 def get_config(settings_module: str = "") -> ModuleType:
