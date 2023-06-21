@@ -13,7 +13,6 @@ jobs:
   build_test_release_push:
     permissions: 
       contents: write
-      packages: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -62,7 +61,7 @@ jobs:
         uses: snok/container-retention-policy@v2
         with:
           image-names: ${{ github.event.repository.name }}/*
-          cut-off: Ten months ago UTC
+          cut-off: Four months ago UTC
           timestamp-to-use: updated_at
           account-type: org
           org-name: sanger
