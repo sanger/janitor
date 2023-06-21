@@ -64,7 +64,7 @@ def sort_results(
     """Sort results to add to table and filter out entries missing location.
 
     Arguments:
-        entries {List[Dict[str, Any]]}: entries to sort
+        entries {Sequence[Any]}: entries to sort
 
     Returns:
         mlwh_entries {List[LabwareMLWHEntry]}: entries to add to MLWH table
@@ -74,10 +74,14 @@ def sort_results(
     invalid_entries = []
     for index in range(len(entries)):
         result_dict = parse_entry(entries[index], labware_labwhere_columns)
-        if (
+
+        entry_has_no_barcode = (
             result_dict["unordered_barcode"] is None
             and result_dict["ordered_barcode"] is None
-        ):
+        )
+        entry_has_no_valid_user = result_dict["stored_by"] is None
+
+        if entry_has_no_barcode or entry_has_no_valid_user:
             invalid_entries.append(result_dict)
         else:
             mlwh_entries.append(
