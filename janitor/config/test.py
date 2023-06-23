@@ -2,7 +2,7 @@
 from .defaults import *
 
 # setting here will overwrite those in 'defaults.py'
-SYNC_JOB_INTERVAL_SEC = 120
+SYNC_JOB_INTERVAL_SEC = 300
 SYNC_JOB_OVERLAP_SEC = 10
 
 LABWHERE_DB: DbConnectionDetails = {
