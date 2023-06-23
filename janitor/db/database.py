@@ -5,7 +5,6 @@ from typing import List, Dict, Any, Sequence, cast
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +22,7 @@ class Database:
             username=creds["username"],
             password=creds["password"],
         )
+
         self.connection = cast(MySQLConnectionAbstract, connection)
 
         self.cursor = self.connection.cursor()
@@ -68,9 +68,7 @@ class Database:
         while entries_index < num_entries:
             self.cursor.executemany(
                 query,
-                list_of_entries_values(
-                    entries[entries_index : entries_index + rows_per_query]  # noqa
-                ),
+                list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
             )
             entries_index += rows_per_query
 

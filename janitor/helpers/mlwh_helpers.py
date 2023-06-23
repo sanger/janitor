@@ -75,17 +75,12 @@ def sort_results(
     for index in range(len(entries)):
         result_dict = parse_entry(entries[index], labware_labwhere_columns)
 
-        entry_has_no_barcode = (
-            result_dict["unordered_barcode"] is None
-            and result_dict["ordered_barcode"] is None
-        )
+        entry_has_no_barcode = result_dict["unordered_barcode"] is None and result_dict["ordered_barcode"] is None
         entry_has_no_valid_user = result_dict["stored_by"] is None
 
         if entry_has_no_barcode or entry_has_no_valid_user:
             invalid_entries.append(result_dict)
         else:
-            mlwh_entries.append(
-                make_mlwh_entry(cast(LabwareLabwhereEntry, result_dict))
-            )
+            mlwh_entries.append(make_mlwh_entry(cast(LabwareLabwhereEntry, result_dict)))
 
     return mlwh_entries, invalid_entries
