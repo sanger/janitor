@@ -115,12 +115,16 @@ def lw_audits_table(lw_database, request):
     drop_table_query = f"DROP TABLE IF EXISTS {table_name};"
     lw_database.execute_query(drop_table_query, {})
 
-    cols = "id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)"
+    cols = """
+    id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)
+    """
     create_table_query = f"CREATE TABLE {table_name} ({cols});"
     lw_database.execute_query(create_table_query, {})
 
     if request.param:
-        insert_into_table_query = f"INSERT INTO {table_name} (id, auditable_id, auditable_type, user_id, updated_at) VALUES (%s, %s, %s, %s, %s);"
+        insert_into_table_query = f"""
+        INSERT INTO {table_name} (id, auditable_id, auditable_type, user_id, updated_at) VALUES (%s, %s, %s, %s, %s);
+        """
         lw_database.write_entries_to_table(insert_into_table_query, request.param, len(request.param))
 
 
