@@ -41,9 +41,9 @@ class LabwareLocationTableEntry(TypedDict):
     labware_barcode: str
     location_barcode: str
     full_location_address: str
-    coordinate_position: int
-    coordinate_row: int
-    coordinate_column: int
+    coordinate_position: Optional[int]
+    coordinate_row: Optional[int]
+    coordinate_column: Optional[int]
     lims_id: str
     stored_by: str
     stored_at: datetime
