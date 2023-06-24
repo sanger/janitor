@@ -9,7 +9,16 @@ from tests.types import (
 )
 
 
-def get_time(delta_mins: datetime):
+def get_time(delta_mins: int) -> datetime:
+    """
+    Get current time minus specified number of minutes.
+
+    Parameters:
+        delta_mins {int}: Number of minutes to subtract
+
+    Returns:
+        {datetime}: Current time minus minutes
+    """
     return (datetime.utcnow() - timedelta(minutes=delta_mins)).replace(microsecond=0, second=0)
 
 
