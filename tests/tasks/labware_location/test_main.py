@@ -243,7 +243,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     indirect=True,
 )
 @patch("janitor.tasks.labware_location.main.logging.info")
-def test_given_good_updated_input_entry_with_outdated_entry_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
+def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
     mock_info,
     config,
     mlwh_database,
