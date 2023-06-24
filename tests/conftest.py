@@ -45,6 +45,24 @@ def mlwh_creds(config):
 
 
 @pytest.fixture
+def labware_location_columns():
+    return [
+        "id",
+        "labware_barcode",
+        "location_barcode",
+        "full_location_address",
+        "coordinate_position",
+        "coordinate_row",
+        "coordinate_column",
+        "lims_id",
+        "stored_by",
+        "stored_at",
+        "created_at",
+        "updated_at",
+    ]
+
+
+@pytest.fixture
 def lw_database(lw_creds):
     try:
         # Create the database if it doesn't exist
