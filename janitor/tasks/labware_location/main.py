@@ -31,6 +31,8 @@ def sync_changes_from_labwhere(config):
         5000,
     )
 
+    logger.info("Closing connections to databases...")
     db_labwhere.close()
     db_mlwh.close()
+    logger.info("Task successful!")
     logger.info(f"Task complete in {round(time.time() - start, 2)}s")
