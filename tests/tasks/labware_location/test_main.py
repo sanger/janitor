@@ -334,13 +334,9 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
         call("Task successful!"),
     )
 
-    assert mock_error.has_calls(
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["bad_input_entry_without_audits"]["input_lw"]["labwares"][0]}
-            """
-        )
-    )
+    bad_entry = TEST_ENTRIES["bad_input_entry_without_location"]["input_lw"]["labwares"][0]
+
+    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
 
 
 @pytest.mark.parametrize(
@@ -394,13 +390,9 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
         call("Task successful!"),
     )
 
-    assert mock_error.has_calls(
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["bad_input_entry_without_audits"]["input_lw"]["labwares"][0]}
-            """
-        )
-    )
+    bad_entry = TEST_ENTRIES["bad_input_entry_without_audits"]["input_lw"]["labwares"][0]
+
+    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
 
 
 @pytest.mark.parametrize(
@@ -454,13 +446,9 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
         call("Task successful!"),
     )
 
-    assert mock_error.has_calls(
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["bad_input_entry_without_location_without_audits"]["input_lw"]["labwares"][0]}
-            """
-        )
-    )
+    bad_entry = TEST_ENTRIES["bad_input_entry_without_location_without_audits"]["input_lw"]["labwares"][0]
+
+    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
 
 
 @pytest.mark.parametrize(
@@ -509,9 +497,9 @@ def test_given_mixed_entries_when_writing_entries_then_check_all_entries_process
     lw_coordinates_table,
 ):
     sync_changes_from_labwhere(config)
-    result = mlwh_database.execute_query("SELECT * FROM labware_location", {})
-    for result_index in range(len(result)):
-        actual_result = parse_entry(result[result_index], labware_location_columns)
+    good_entries = mlwh_database.execute_query("SELECT * FROM labware_location", {})
+    for result_index in range(len(good_entries)):
+        actual_result = parse_entry(good_entries[result_index], labware_location_columns)
         expected_result = TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"][result_index]
 
         assert actual_result["id"] == expected_result["id"]
@@ -534,25 +522,11 @@ def test_given_mixed_entries_when_writing_entries_then_check_all_entries_process
         call("Task successful!"),
     )
 
+    bad_entries = TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"]
+
     assert mock_error.has_calls(
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"][0]}
-            """
-        ),
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"][1]}
-            """
-        ),
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"][2]}
-            """
-        ),
-        call(
-            f"""
-                Found invalid entry: {TEST_ENTRIES["mixed_input_entries"]["output_mlwh_expected"]["labware_location"][3]}
-            """
-        ),
+        call(f"Found invalid entry: {bad_entries[0]}"),
+        call(f"Found invalid entry: {bad_entries[1]}"),
+        call(f"Found invalid entry: {bad_entries[2]}"),
+        call(f"Found invalid entry: {bad_entries[3]}"),
     )
