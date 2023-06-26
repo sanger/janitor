@@ -5,7 +5,7 @@ from .defaults import *
 SYNC_JOB_INTERVAL_SEC = 300
 SYNC_JOB_OVERLAP_SEC = 10
 
-LABWHERE_DB: DbConnectionDetails = {
+LABWHERE_DB: DbConnectionDetails = {  # type: ignore
     "db_name": "janitor_tests_lw_input",
     "host": "127.0.0.1",
     "port": 3306,
@@ -13,7 +13,7 @@ LABWHERE_DB: DbConnectionDetails = {
     "password": "",
 }
 
-MLWH_DB: DbConnectionDetails = {
+MLWH_DB: DbConnectionDetails = {  # type: ignore
     "db_name": "janitor_tests_mlwh_output",
     "host": "127.0.0.1",
     "port": 3306,
