@@ -1,18 +1,17 @@
 import pytest
 from unittest.mock import patch, call
 import mysql.connector
-from janitor.db.database import Database
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
 from janitor.helpers.mysql_helpers import parse_entry
 from tests.data.test_entries import TEST_ENTRIES
 
 
-@patch("janitor.tasks.labware_location.main.logging.info")
-@patch("janitor.tasks.labware_location.main.logging.error")
-def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_info, mock_error, config):
+@patch("logging.info")
+@patch("logging.error")
+def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(
+    mock_info, mock_error, config, lw_database
+):
     with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
-        Database(config.LABWHERE_DB)
-
         assert mock_info.has_calls(
             call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['port']}..."),
         )
@@ -23,7 +22,7 @@ def test_given_invalid_connection_when_connecting_to_db_then_check_error_message
         )
 
 
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_valid_db_details_for_lw_database_when_connecting_to_db_then_check_connection_successful(
     mock_info, config, lw_database
 ):
@@ -33,7 +32,7 @@ def test_given_valid_db_details_for_lw_database_when_connecting_to_db_then_check
     )
 
 
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_valid_db_details_for_mlwh_database_when_connecting_to_db_then_check_connection_successful(
     mock_info, config, mlwh_database
 ):
@@ -73,7 +72,7 @@ def test_given_valid_db_details_for_mlwh_database_when_connecting_to_db_then_che
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_good_input_entry_with_location_id_when_making_mlwh_entry_then_check_entry_written_correctly(
     mock_info,
     config,
@@ -142,7 +141,7 @@ def test_given_good_input_entry_with_location_id_when_making_mlwh_entry_then_che
     [TEST_ENTRIES["good_input_entry_with_coordinates"]["input_lw"]["coordinates"]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_check_entry_written_correctly(
     mock_info,
     config,
@@ -211,7 +210,7 @@ def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_c
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_check_latest_audit_used(
     mock_info,
     config,
@@ -280,7 +279,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("logging.info")
 def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
     mock_info,
     config,
@@ -351,8 +350,8 @@ def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entr
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
-@patch("janitor.tasks.labware_location.main.logging.error")
+@patch("logging.info")
+@patch("logging.error")
 def test_given_bad_input_entry_without_location_when_making_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
@@ -407,8 +406,8 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
-@patch("janitor.tasks.labware_location.main.logging.error")
+@patch("logging.info")
+@patch("logging.error")
 def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
@@ -463,8 +462,8 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
     [[]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
-@patch("janitor.tasks.labware_location.main.logging.error")
+@patch("logging.info")
+@patch("logging.error")
 def test_given_bad_input_entry_without_location_without_audits_when_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
@@ -519,8 +518,8 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
     [TEST_ENTRIES["mixed_input_entries"]["input_lw"]["coordinates"]],
     indirect=True,
 )
-@patch("janitor.tasks.labware_location.main.logging.info")
-@patch("janitor.tasks.labware_location.main.logging.error")
+@patch("logging.info")
+@patch("logging.error")
 def test_given_mixed_entries_when_writing_entries_then_check_all_entries_processed_correctly(
     mock_info,
     mock_error,
