@@ -6,37 +6,45 @@ from janitor.helpers.mysql_helpers import parse_entry
 from tests.data.test_entries import TEST_ENTRIES
 
 
-@patch("logging.info")
 @patch("logging.error")
-def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(
-    mock_info, mock_error, config, lw_database
-):
+def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_error, config):
     with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
-        assert mock_info.has_calls(
-            call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['port']}..."),
-        )
-
+        sync_changes_from_labwhere(config)
         assert mock_error.has_calls(
             call("MySQL connection failed!"),
             call(f"Exception on connecting to MySQL database: {mysql.connector.Error()}"),
         )
 
 
+@patch("logging.error")
+def test_given_error_when_executing_sql_query_then_check_error_messages_logged(mock_error, config):
+    with patch("mysql.connector.cursor") as mock_execute:
+        mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
+        sync_changes_from_labwhere(config)
+        assert mock_error.has_calls(
+            call(f"Exception on executing query:  {AttributeError('Database not connected')}"),
+        )
+
+
+@patch("logging.error")
+def test_given_error_when_writing_to_table_then_check_error_messages_logged(mock_error, config):
+    with patch("mysql.connector.cursor") as mock_execute:
+        mock_execute.return_value.executemany.return_value = AttributeError("Database not connected")
+        sync_changes_from_labwhere(config)
+        assert mock_error.has_calls(
+            call(f"Exception on writing entries:  {AttributeError('Database not connected')}"),
+        )
+
+
 @patch("logging.info")
-def test_given_valid_db_details_for_lw_database_when_connecting_to_db_then_check_connection_successful(
-    mock_info, config, lw_database
+def test_given_valid_db_details_when_connecting_to_db_then_check_connection_successful(
+    mock_info,
+    config,
 ):
+    sync_changes_from_labwhere(config)
     assert mock_info.has_calls(
         call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['host']}..."),
         call(f"MySQL connection to {config.LABWHERE_DB['db_name']} successful!"),
-    )
-
-
-@patch("logging.info")
-def test_given_valid_db_details_for_mlwh_database_when_connecting_to_db_then_check_connection_successful(
-    mock_info, config, mlwh_database
-):
-    assert mock_info.has_calls(
         call(f"Attempting to connect to {config.MLWH_DB['host']} on port {config.MLWH_DB['host']}..."),
         call(f"MySQL connection to {config.MLWH_DB['db_name']} successful!"),
     )
