@@ -1,8 +1,46 @@
 import pytest
 from unittest.mock import patch, call
+import mysql.connector
+from janitor.db.database import Database
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
 from janitor.helpers.mysql_helpers import parse_entry
 from tests.data.test_entries import TEST_ENTRIES
+
+
+@patch("janitor.tasks.labware_location.main.logging.info")
+@patch("janitor.tasks.labware_location.main.logging.error")
+def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_info, mock_error, config):
+    with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
+        Database(config.LABWHERE_DB)
+
+        assert mock_info.has_calls(
+            call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['port']}..."),
+        )
+
+        assert mock_error.has_calls(
+            call("MySQL connection failed!"),
+            call(f"Exception on connecting to MySQL database: {mysql.connector.Error()}"),
+        )
+
+
+@patch("janitor.tasks.labware_location.main.logging.info")
+def test_given_valid_db_details_for_lw_database_when_connecting_to_db_then_check_connection_successful(
+    mock_info, config, lw_database
+):
+    assert mock_info.has_calls(
+        call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['host']}..."),
+        call(f"MySQL connection to {config.LABWHERE_DB['db_name']} successful!"),
+    )
+
+
+@patch("janitor.tasks.labware_location.main.logging.info")
+def test_given_valid_db_details_for_mlwh_database_when_connecting_to_db_then_check_connection_successful(
+    mock_info, config, mlwh_database
+):
+    assert mock_info.has_calls(
+        call(f"Attempting to connect to {config.MLWH_DB['host']} on port {config.MLWH_DB['host']}..."),
+        call(f"MySQL connection to {config.MLWH_DB['db_name']} successful!"),
+    )
 
 
 @pytest.mark.parametrize(
