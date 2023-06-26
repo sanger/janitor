@@ -1,7 +1,7 @@
 import logging
+from typing import List, Dict, Any, Sequence, cast
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
-from typing import List, Dict, Any, Sequence, cast
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
 
@@ -15,17 +15,27 @@ class Database:
         Arguments:
             creds {DbConnectionDetails}: details for database connection
         """
-        connection = mysql.connect(
-            host=creds["host"],
-            port=creds["port"],
-            database=creds["db_name"],
-            username=creds["username"],
-            password=creds["password"],
-        )
+        logger.info(f"Attempting to connect to {creds['host']} on port {creds['port']}...")
 
-        self.connection = cast(MySQLConnectionAbstract, connection)
+        try:
+            connection = mysql.connect(
+                host=creds["host"],
+                port=creds["port"],
+                database=creds["db_name"],
+                username=creds["username"],
+                password=creds["password"],
+            )
 
-        self.cursor = self.connection.cursor()
+            if connection is not None:
+                if connection.is_connected():
+                    logger.info(f"MySQL connection to {creds['db_name']} successful!")
+                    self.connection = cast(MySQLConnectionAbstract, connection)
+                    self.cursor = self.connection.cursor()
+                else:
+                    logger.error("MySQL connection failed!")
+
+        except mysql.Error as e:
+            logger.error(f"Exception on connecting to MySQL database: {e}")
 
     def close(self) -> None:
         """Close connection to database."""
@@ -41,7 +51,7 @@ class Database:
             params {Dict[str, str]}: Additional parameters to inject to SQL query
 
         Returns:
-            results {List[Any]}: list of queried results
+            results {Sequence[Any]}: list of queried results
         """
         logger.info(f"Executing query: {query}")
         self.cursor.execute(query, params)
@@ -59,7 +69,7 @@ class Database:
         Arguments:
             query {str}: SQL query to execute against table
             values {List[Dict[str, Any]]}: list of parsed entries to add to table
-            rows_per_query {str}: number of rows per batch
+            rows_per_query {int}: number of rows per batch
         """
         self.connection.start_transaction()
         num_entries = len(entries)
