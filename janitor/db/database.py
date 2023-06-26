@@ -39,9 +39,12 @@ class Database:
 
     def close(self) -> None:
         """Close connection to database."""
-        if self.connection.is_connected():
-            self.connection.close()
-            self.cursor.close()
+        try:
+            if self.connection.is_connected():
+                self.connection.close()
+                self.cursor.close()
+        except Exception as e:
+            logger.error(f"Exception on closing connection: {e}")
 
     def execute_query(self, query: str, params: Dict[str, str]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
@@ -54,8 +57,13 @@ class Database:
             results {Sequence[Any]}: list of queried results
         """
         logger.info(f"Executing query: {query}")
-        self.cursor.execute(query, params)
-        results = self.cursor.fetchall()
+        results = cast(Sequence, [])
+        try:
+            self.cursor.execute(query, params)
+            results = self.cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Exception on executing query: {e}")
+
         return results
 
     def write_entries_to_table(
@@ -71,15 +79,18 @@ class Database:
             values {List[Dict[str, Any]]}: list of parsed entries to add to table
             rows_per_query {int}: number of rows per batch
         """
-        self.connection.start_transaction()
-        num_entries = len(entries)
-        entries_index = 0
+        try:
+            self.connection.start_transaction()
+            num_entries = len(entries)
+            entries_index = 0
 
-        while entries_index < num_entries:
-            self.cursor.executemany(
-                query,
-                list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
-            )
-            entries_index += rows_per_query
+            while entries_index < num_entries:
+                self.cursor.executemany(
+                    query,
+                    list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
+                )
+                entries_index += rows_per_query
 
-        self.connection.commit()
+            self.connection.commit()
+        except Exception as e:
+            logger.error(f"Exception on writing entries: {e}")
