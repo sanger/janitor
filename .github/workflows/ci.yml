@@ -12,6 +12,9 @@ on:
       - develop
       - master
 
+env:
+  SETTINGS_MODULE: janitor.config.test
+
 jobs:
   black:
     runs-on: ubuntu-latest
@@ -84,3 +87,39 @@ jobs:
       - name: Run mypy
         run: |
           python -m mypy .
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install pipenv
+        run: |
+          pip install pipenv
+      - name: Install dependencies
+        run: |
+          pipenv sync --dev --system
+      - name: Set up MySQL databases
+        run: |
+          mysql -e 'CREATE DATABASE janitor_tests_lw_input;' -uroot -h '127.0.0.1'
+          mysql -e 'CREATE DATABASE janitor_tests_mlwh_output;' -uroot -h '127.0.0.1'
+      - name: Test with pytest
+        run: |
+          python -m pytest -vx
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
