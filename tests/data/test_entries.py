@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Dict, Any
 from tests.types import (
     LabwaresTableEntry,
     AuditsTableEntry,
@@ -22,7 +23,7 @@ def get_time(delta_mins: int) -> datetime:
     return (datetime.utcnow() - timedelta(minutes=delta_mins)).replace(microsecond=0, second=0)
 
 
-TEST_ENTRIES = {
+TEST_ENTRIES: Dict[str, Any] = {
     "good_input_entry_with_location": {
         "input_lw": {
             "labwares": [LabwaresTableEntry(id=1, barcode="labware1", location_id=1, coordinate_id=None)],
