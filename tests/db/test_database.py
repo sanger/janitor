@@ -10,7 +10,7 @@ test_config = DbConnectionDetails(
 
 
 @patch("logging.error")
-def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_error, config):
+def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_error):
     with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
         Database(test_config)
         assert mock_error.has_calls(
@@ -20,7 +20,7 @@ def test_given_invalid_connection_when_connecting_to_db_then_check_error_message
 
 
 @patch("logging.error")
-def test_given_invalid_connection_when_closing_connection_then_check_error_message_logged(mock_error, config):
+def test_given_invalid_connection_when_closing_connection_then_check_error_message_logged(mock_error):
     with patch("mysql.connector.cursor") as mock_execute:
         mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
         test_db = Database(test_config)
@@ -31,7 +31,7 @@ def test_given_invalid_connection_when_closing_connection_then_check_error_messa
 
 
 @patch("logging.error")
-def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error, config):
+def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error):
     with patch("mysql.connector.cursor") as mock_execute:
         mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
         test_db = Database(test_config)
@@ -42,7 +42,7 @@ def test_given_error_when_executing_sql_query_then_check_error_message_logged(mo
 
 
 @patch("logging.error")
-def test_given_error_when_writing_to_table_then_check_error_message_logged(mock_error, config):
+def test_given_error_when_writing_to_table_then_check_error_message_logged(mock_error):
     with patch("mysql.connector.cursor") as mock_execute:
         mock_execute.return_value.executemany.return_value = AttributeError("Database not connected")
         test_db = Database(test_config)
