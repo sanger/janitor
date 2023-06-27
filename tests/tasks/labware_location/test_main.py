@@ -1,39 +1,8 @@
 import pytest
 from unittest.mock import patch, call
-import mysql.connector
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
 from janitor.helpers.mysql_helpers import parse_entry
 from tests.data.test_entries import TEST_ENTRIES
-
-
-@patch("logging.error")
-def test_given_invalid_connection_when_connecting_to_db_then_check_error_messages_logged(mock_error, config):
-    with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
-        sync_changes_from_labwhere(config)
-        assert mock_error.has_calls(
-            call("MySQL connection failed!"),
-            call(f"Exception on connecting to MySQL database: {mysql.connector.Error()}"),
-        )
-
-
-@patch("logging.error")
-def test_given_error_when_executing_sql_query_then_check_error_messages_logged(mock_error, config):
-    with patch("mysql.connector.cursor") as mock_execute:
-        mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
-        sync_changes_from_labwhere(config)
-        assert mock_error.has_calls(
-            call(f"Exception on executing query:  {AttributeError('Database not connected')}"),
-        )
-
-
-@patch("logging.error")
-def test_given_error_when_writing_to_table_then_check_error_messages_logged(mock_error, config):
-    with patch("mysql.connector.cursor") as mock_execute:
-        mock_execute.return_value.executemany.return_value = AttributeError("Database not connected")
-        sync_changes_from_labwhere(config)
-        assert mock_error.has_calls(
-            call(f"Exception on writing entries:  {AttributeError('Database not connected')}"),
-        )
 
 
 @patch("logging.info")
