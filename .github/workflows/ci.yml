@@ -5,12 +5,12 @@ on:
     branches:
       - develop-*
       - develop
-      - master
+      - main
   pull_request:
     branches:
       - develop-*
       - develop
-      - master
+      - main
 
 env:
   SETTINGS_MODULE: janitor.config.test
