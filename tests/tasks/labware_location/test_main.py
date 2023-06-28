@@ -4,7 +4,7 @@ import pytest
 
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
-from tests.data.test_entries import TEST_ENTRIES
+from tests.data.entries import TEST_ENTRIES
 
 
 @patch("logging.info")
