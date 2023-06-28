@@ -1,4 +1,5 @@
 from os import path
+
 from janitor.helpers.mysql_helpers import load_query
 
 wd = path.realpath(path.dirname(__file__))

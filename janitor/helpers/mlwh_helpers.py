@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Sequence, Any, cast
+from typing import Any, Sequence, cast
+
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.types import LabwareLabwhereEntry, LabwareMLWHEntry
 

@@ -1,6 +1,8 @@
-import pytest
 import logging.config
 from copy import deepcopy
+
+import pytest
+
 from janitor.db.database import Database
 from janitor.helpers.config_helpers import get_config
 from janitor.types import DbConnectionDetails

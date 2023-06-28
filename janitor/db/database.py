@@ -1,7 +1,9 @@
 import logging
-from typing import List, Dict, Any, Sequence, cast
+from typing import Any, Dict, List, Sequence, cast
+
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
+
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
 

@@ -1,8 +1,9 @@
-from unittest.mock import patch, call
+from unittest.mock import call, patch
+
 import mysql.connector
+
 from janitor.db.database import Database
 from janitor.types import DbConnectionDetails
-
 
 test_config = DbConnectionDetails(
     host="test_host", port=1, db_name="test_dbname", username="test_username", password="test_password"

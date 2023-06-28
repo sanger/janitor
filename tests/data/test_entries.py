@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any, Dict
+
 from tests.types import (
-    LabwaresTableEntry,
     AuditsTableEntry,
-    UsersTableEntry,
-    LocationsTableEntry,
     CoordinatesTableEntry,
     LabwareLocationTableEntry,
+    LabwaresTableEntry,
+    LocationsTableEntry,
+    UsersTableEntry,
 )
 
 

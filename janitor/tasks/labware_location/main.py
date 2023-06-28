@@ -1,8 +1,9 @@
 import logging
 import time
-from janitor.tasks.labware_location.sql_queries.sql_queries import GET_LOCATIONS_QUERY, WRITE_TO_LABWARE_LOCATION_QUERY
+
 from janitor.db.database import Database
 from janitor.helpers.mlwh_helpers import sort_results
+from janitor.tasks.labware_location.sql_queries.sql_queries import GET_LOCATIONS_QUERY, WRITE_TO_LABWARE_LOCATION_QUERY
 
 logger = logging.getLogger(__name__)
 

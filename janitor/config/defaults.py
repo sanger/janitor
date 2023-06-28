@@ -1,6 +1,8 @@
 # flake8: noqa
 import os
+
 from janitor.types import DbConnectionDetails
+
 from .logging import *
 
 LOCALHOST = os.environ.get("LOCALHOST", "127.0.0.1")
