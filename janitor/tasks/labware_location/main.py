@@ -13,10 +13,10 @@ def sync_changes_from_labwhere(config):
     logger.info("Starting sync labware locations task...")
     db_labwhere = Database(config.LABWHERE_DB)
     db_mlwh = Database(config.MLWH_DB)
-
+    sync_job_interval = config.SYNC_JOB_INTERVAL_SEC + config.SYNC_JOB_OVERLAP_SEC
     results = db_labwhere.execute_query(
         GET_LOCATIONS_QUERY,
-        {"interval": str(config.SYNC_JOB_INTERVAL_SEC + config.SYNC_JOB_OVERLAP_SEC)},
+        {"interval": str(sync_job_interval)},
     )
 
     mlwh_entries, invalid_entries = sort_results(results)
