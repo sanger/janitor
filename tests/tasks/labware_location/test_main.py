@@ -20,11 +20,6 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
 
 
 @pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["good_input_entry_with_location"]["input_lw"]["labwares"]],
     indirect=True,
@@ -42,11 +37,6 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
 @pytest.mark.parametrize(
     "lw_locations_table",
     [TEST_ENTRIES["good_input_entry_with_location"]["input_lw"]["locations"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
     indirect=True,
 )
 @patch("logging.info")
@@ -88,11 +78,6 @@ def test_given_good_input_entry_with_location_id_when_making_mlwh_entry_then_che
     )
 
 
-@pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
 @pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["good_input_entry_with_coordinates"]["input_lw"]["labwares"]],
@@ -158,11 +143,6 @@ def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_c
 
 
 @pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["good_input_entry_with_two_audits"]["input_lw"]["labwares"]],
     indirect=True,
@@ -180,11 +160,6 @@ def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_c
 @pytest.mark.parametrize(
     "lw_locations_table",
     [TEST_ENTRIES["good_input_entry_with_two_audits"]["input_lw"]["locations"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
     indirect=True,
 )
 @patch("logging.info")
@@ -251,11 +226,6 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     [TEST_ENTRIES["good_input_entry_outdated_record_in_mlwh"]["input_lw"]["locations"]],
     indirect=True,
 )
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
-    indirect=True,
-)
 @patch("logging.info")
 def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
     mock_info,
@@ -298,11 +268,6 @@ def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entr
 
 
 @pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["bad_input_entry_without_location"]["input_lw"]["labwares"]],
     indirect=True,
@@ -315,16 +280,6 @@ def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entr
 @pytest.mark.parametrize(
     "lw_users_table",
     [TEST_ENTRIES["bad_input_entry_without_location"]["input_lw"]["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
     indirect=True,
 )
 @patch("logging.info")
@@ -354,33 +309,13 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
 
 
 @pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["bad_input_entry_without_audits"]["input_lw"]["labwares"]],
     indirect=True,
 )
 @pytest.mark.parametrize(
-    "lw_audits_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_locations_table",
     [TEST_ENTRIES["bad_input_entry_without_audits"]["input_lw"]["locations"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
     indirect=True,
 )
 @patch("logging.info")
@@ -410,33 +345,8 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
 
 
 @pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["bad_input_entry_without_location_without_audits"]["input_lw"]["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [[]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [[]],
     indirect=True,
 )
 @patch("logging.info")
@@ -465,11 +375,6 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
     assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
 
 
-@pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [[]],
-    indirect=True,
-)
 @pytest.mark.parametrize(
     "lw_labwares_table",
     [TEST_ENTRIES["mixed_input_entries"]["input_lw"]["labwares"]],
