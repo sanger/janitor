@@ -21,19 +21,19 @@ def test_given_invalid_connection_when_connecting_to_db_then_check_error_message
 
 @patch("logging.error")
 def test_given_invalid_connection_when_closing_connection_then_check_error_message_logged(mock_error):
-    with patch("mysql.connector.cursor") as mock_execute:
-        mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
+    with patch("mysql.connector.connect") as mock_connect:
+        mock_connect.return_value.close.return_value = mysql.connector.Error()
         test_db = Database(test_config)
         test_db.close()
         assert mock_error.has_calls(
-            call(f"Exception on closing connection:  {AttributeError('Database not connected')}"),
+            call(f"Exception on closing connection:  {mysql.connector.Error()}"),
         )
 
 
 @patch("logging.error")
 def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error):
-    with patch("mysql.connector.cursor") as mock_execute:
-        mock_execute.return_value.execute.return_value = AttributeError("Database not connected")
+    with patch("mysql.connector.cursor") as mock_cursor:
+        mock_cursor.return_value.execute.return_value = AttributeError("Database not connected")
         test_db = Database(test_config)
         test_db.execute_query("query", {})
         assert mock_error.has_calls(
@@ -43,8 +43,8 @@ def test_given_error_when_executing_sql_query_then_check_error_message_logged(mo
 
 @patch("logging.error")
 def test_given_error_when_writing_to_table_then_check_error_message_logged(mock_error):
-    with patch("mysql.connector.cursor") as mock_execute:
-        mock_execute.return_value.executemany.return_value = AttributeError("Database not connected")
+    with patch("mysql.connector.cursor") as mock_cursor:
+        mock_cursor.return_value.executemany.return_value = AttributeError("Database not connected")
         test_db = Database(test_config)
         test_db.write_entries_to_table("query", [], 5000)
         assert mock_error.has_calls(
