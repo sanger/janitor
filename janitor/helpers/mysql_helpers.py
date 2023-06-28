@@ -14,7 +14,7 @@ def load_query(filepath: str) -> str:
         return query.read()
 
 
-def parse_entry(entry: Dict[str, Any], column_names: List[str]) -> Dict[str, Any]:
+def parse_entry(entry: List[Any], column_names: List[str]) -> Dict[str, Any]:
     """Parse entry into dictionary form for easier indexing.
 
     Arguments:

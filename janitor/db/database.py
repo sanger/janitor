@@ -1,10 +1,9 @@
 import logging
+from typing import List, Dict, Any, Sequence, cast
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
-from typing import List, Dict, Any, Sequence, cast
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
-
 
 logger = logging.getLogger(__name__)
 
@@ -16,22 +15,36 @@ class Database:
         Arguments:
             creds {DbConnectionDetails}: details for database connection
         """
-        connection = mysql.connect(
-            host=creds["host"],
-            port=creds["port"],
-            database=creds["db_name"],
-            username=creds["username"],
-            password=creds["password"],
-        )
-        self.connection = cast(MySQLConnectionAbstract, connection)
+        logger.info(f"Attempting to connect to {creds['host']} on port {creds['port']}...")
 
-        self.cursor = self.connection.cursor()
+        try:
+            connection = mysql.connect(
+                host=creds["host"],
+                port=creds["port"],
+                database=creds["db_name"],
+                username=creds["username"],
+                password=creds["password"],
+            )
+
+            if connection is not None:
+                if connection.is_connected():
+                    logger.info(f"MySQL connection to {creds['db_name']} successful!")
+                    self.connection = cast(MySQLConnectionAbstract, connection)
+                    self.cursor = self.connection.cursor()
+                else:
+                    logger.error("MySQL connection failed!")
+
+        except mysql.Error as e:
+            logger.error(f"Exception on connecting to MySQL database: {e}")
 
     def close(self) -> None:
         """Close connection to database."""
-        if self.connection.is_connected():
-            self.connection.close()
-            self.cursor.close()
+        try:
+            if self.connection.is_connected():
+                self.connection.close()
+                self.cursor.close()
+        except Exception as e:
+            logger.error(f"Exception on closing connection: {e}")
 
     def execute_query(self, query: str, params: Dict[str, str]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
@@ -41,11 +54,16 @@ class Database:
             params {Dict[str, str]}: Additional parameters to inject to SQL query
 
         Returns:
-            results {List[Any]}: list of queried results
+            results {Sequence[Any]}: list of queried results
         """
         logger.info(f"Executing query: {query}")
-        self.cursor.execute(query, params)
-        results = self.cursor.fetchall()
+        results = cast(Sequence, [])
+        try:
+            self.cursor.execute(query, params)
+            results = self.cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Exception on executing query: {e}")
+
         return results
 
     def write_entries_to_table(
@@ -59,19 +77,20 @@ class Database:
         Arguments:
             query {str}: SQL query to execute against table
             values {List[Dict[str, Any]]}: list of parsed entries to add to table
-            rows_per_query {str}: number of rows per batch
+            rows_per_query {int}: number of rows per batch
         """
-        self.connection.start_transaction()
-        num_entries = len(entries)
-        entries_index = 0
+        try:
+            self.connection.start_transaction()
+            num_entries = len(entries)
+            entries_index = 0
 
-        while entries_index < num_entries:
-            self.cursor.executemany(
-                query,
-                list_of_entries_values(
-                    entries[entries_index : entries_index + rows_per_query]  # noqa
-                ),
-            )
-            entries_index += rows_per_query
+            while entries_index < num_entries:
+                self.cursor.executemany(
+                    query,
+                    list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
+                )
+                entries_index += rows_per_query
 
-        self.connection.commit()
+            self.connection.commit()
+        except Exception as e:
+            logger.error(f"Exception on writing entries: {e}")
