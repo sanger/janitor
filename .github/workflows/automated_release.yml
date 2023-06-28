@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - master
+      - main
 
 env:
   IMAGE_NAME: ${{ github.repository }}/${{ github.event.repository.name }}
@@ -59,7 +59,7 @@ jobs:
         with:
           name: ${{ env.RELEASE_NAME }}
           tag: ${{ env.RELEASE_TAG }}
-          prerelease: ${{ !(github.ref == 'refs/heads/master') }}
+          prerelease: ${{ !(github.ref == 'refs/heads/main') }}
           commit: ${{ github.sha }}
 
       - name: Login to registry

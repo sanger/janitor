@@ -27,7 +27,7 @@ jobs:
           -u ${{ github.actor }}
           -p ${{ secrets.GITHUB_TOKEN }}
           docker.pkg.github.com
-      - name: Publish image with image tag being either develop/master/<tag_name>
+      - name: Publish image with image tag being either develop/main/<tag_name>
         run: >-
           docker push
           docker.pkg.github.com/${IMAGE_NAME}:${{ github.event.inputs.image_tag }}

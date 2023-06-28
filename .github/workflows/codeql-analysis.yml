@@ -14,7 +14,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ develop-*, develop, master ]
+    branches: [ develop-*, develop, main ]
     paths-ignore:
       - "README.md"
   pull_request:
