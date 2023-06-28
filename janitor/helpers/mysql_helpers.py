@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import Any, Dict, List
 
 
-def load_query(filepath: str) -> str:
+def load_query(filepath: Path) -> str:
     """Load query from .sql file.
 
     Arguments:
