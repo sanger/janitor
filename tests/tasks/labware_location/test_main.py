@@ -1,7 +1,7 @@
+from typing import List, Optional
 from unittest.mock import call, patch
 
-import pytest
-
+from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
 from tests.data.entries import (
@@ -19,6 +19,174 @@ from tests.data.entries import (
     mixed_entries_input,
     mixed_entries_output,
 )
+from tests.types import (
+    AuditsTableEntry,
+    CoordinatesTableEntry,
+    LabwareLocationTableEntry,
+    LabwaresTableEntry,
+    LocationsTableEntry,
+    UsersTableEntry,
+)
+
+labware_location_columns = [
+    "id",
+    "labware_barcode",
+    "location_barcode",
+    "full_location_address",
+    "coordinate_position",
+    "coordinate_row",
+    "coordinate_column",
+    "lims_id",
+    "stored_by",
+    "stored_at",
+    "created_at",
+    "updated_at",
+]
+
+
+def clear_tables(lw_database: Database, mlwh_database: Database) -> None:
+    """
+    Clear all the tables in the LabWhere and MLWH databases.
+
+    Parameters:
+        lw_database {Database}: LabWhere database
+        mlwh_database {Database}: MLWH database
+    """
+    # Labwares table
+    drop_table_query = "DROP TABLE IF EXISTS labwares;"
+    lw_database.execute_query(drop_table_query, {})
+
+    labwares_cols = "id int(11) primary key, barcode varchar(255), location_id int(11), coordinate_id int(11)"
+    create_table_query = f"CREATE TABLE labwares ({labwares_cols});"
+    lw_database.execute_query(create_table_query, {})
+
+    # Audits table
+    drop_table_query = "DROP TABLE IF EXISTS audits;"
+    lw_database.execute_query(drop_table_query, {})
+
+    audits_cols = """
+    id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)
+    """
+    create_table_query = f"CREATE TABLE audits ({audits_cols});"
+    lw_database.execute_query(create_table_query, {})
+
+    # Users table
+    drop_table_query = "DROP TABLE IF EXISTS users;"
+    lw_database.execute_query(drop_table_query, {})
+
+    users_cols = "id int(11) primary key, login varchar(255)"
+    create_table_query = f"CREATE TABLE users ({users_cols});"
+    lw_database.execute_query(create_table_query, {})
+
+    # Locations table
+    drop_table_query = "DROP TABLE IF EXISTS locations;"
+    lw_database.execute_query(drop_table_query, {})
+
+    locations_cols = "id int(11) primary key, barcode varchar(255), parentage varchar(255)"
+    create_table_query = f"CREATE TABLE locations ({locations_cols});"
+    lw_database.execute_query(create_table_query, {})
+
+    # Coordinates table
+    drop_table_query = "DROP TABLE IF EXISTS coordinates;"
+    lw_database.execute_query(drop_table_query, {})
+
+    coordinates_cols = (
+        "id int(11) primary key, `position` int(11), `row` int(11), `column` int(11), location_id int(11)"
+    )
+    create_table_query = f"CREATE TABLE coordinates ({coordinates_cols});"
+    lw_database.execute_query(create_table_query, {})
+
+    # Labware location table
+    drop_table_query = "DROP TABLE IF EXISTS labware_location;"
+    mlwh_database.execute_query(drop_table_query, {})
+
+    labware_location_cols = """
+        id int(11) primary key NOT NULL AUTO_INCREMENT,
+        labware_barcode varchar(255) NOT NULL UNIQUE,
+        location_barcode varchar(255) NOT NULL,
+        full_location_address varchar(255) NOT NULL,
+        coordinate_position int(11),
+        coordinate_row int(11),
+        coordinate_column int(11),
+        lims_id varchar(255) NOT NULL,
+        stored_by varchar(255) NOT NULL,
+        stored_at datetime(6) NOT NULL,
+        created_at datetime(6) NOT NULL,
+        updated_at datetime(6) NOT NULL
+    """
+    create_table_query = f"CREATE TABLE labware_location ({labware_location_cols});"
+    mlwh_database.execute_query(create_table_query, {})
+
+
+def write_to_tables(
+    lw_database: Database,
+    mlwh_database: Database,
+    labwares_entries: Optional[List[LabwaresTableEntry]] = None,
+    audits_entries: Optional[List[AuditsTableEntry]] = None,
+    users_entries: Optional[List[UsersTableEntry]] = None,
+    locations_entries: Optional[List[LocationsTableEntry]] = None,
+    coordinates_entries: Optional[List[CoordinatesTableEntry]] = None,
+    labware_location_entries: Optional[List[LabwareLocationTableEntry]] = None,
+) -> None:
+    """
+    Write entries to the tables in the LabWhere and MLWH databases.
+
+    Parameters:
+        lw_database {Database}: LabWhere database
+        mlwh_database {Database}: MLWH database
+        labwares_entries {List[LabwaresTableEntry]}: Entries for labwares table (optional)
+        audits_entries {List[AuditsTableEntry]}: Entries for audits table (optional)
+        users_entries {List[UsersTableEntry]}: Entries for users table (optional)
+        locations_entries {List[LocationsTableEntry]}: Entries for locations table (optional)
+        coordinates_entries {List[CoordinatesTableEntry]}: Entries for coordinates table (optional)
+        labware_location_entries {List[LabwareLocationTableEntry]}: Entries for labware_location table (optional)
+    """
+    if labwares_entries:
+        insert_into_table_query = (
+            "INSERT INTO labwares (id, barcode, location_id, coordinate_id) VALUES (%s, %s, %s, %s);"
+        )
+        lw_database.write_entries_to_table(insert_into_table_query, labwares_entries, len(labwares_entries))
+
+    if audits_entries:
+        insert_into_table_query = """
+        INSERT INTO audits (id, auditable_id, auditable_type, user_id, updated_at) VALUES (%s, %s, %s, %s, %s);
+        """
+        lw_database.write_entries_to_table(insert_into_table_query, audits_entries, len(audits_entries))
+
+    if users_entries:
+        insert_into_table_query = "INSERT INTO users (id, login) VALUES (%s, %s);"
+        lw_database.write_entries_to_table(insert_into_table_query, users_entries, len(users_entries))
+
+    if locations_entries:
+        insert_into_table_query = "INSERT INTO locations (id, barcode, parentage) VALUES (%s, %s, %s);"
+        lw_database.write_entries_to_table(insert_into_table_query, locations_entries, len(locations_entries))
+
+    if coordinates_entries:
+        insert_into_table_query = (
+            "INSERT INTO coordinates (id, `position`, `row`, `column`, location_id) VALUES (%s, %s, %s, %s, %s);"
+        )
+        lw_database.write_entries_to_table(insert_into_table_query, coordinates_entries, len(coordinates_entries))
+
+    if labware_location_entries:
+        insert_into_table_query = """
+                INSERT INTO labware_location
+                (
+                    id,
+                    labware_barcode,
+                    location_barcode,
+                    full_location_address,
+                    coordinate_position,
+                    coordinate_row,
+                    coordinate_column,
+                    lims_id,
+                    stored_by,
+                    stored_at,
+                    created_at,
+                    updated_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+        mlwh_database.write_entries_to_table(
+            insert_into_table_query, labware_location_entries, len(labware_location_entries)
+        )
 
 
 @patch("logging.info")
@@ -27,6 +195,7 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
     config,
 ):
     sync_changes_from_labwhere(config)
+
     assert mock_info.has_calls(
         call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['host']}..."),
         call(f"MySQL connection to {config.LABWHERE_DB['db_name']} successful!"),
@@ -35,40 +204,24 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
     )
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [good_input_entry_with_location_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [good_input_entry_with_location_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [good_input_entry_with_location_input["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [good_input_entry_with_location_input["locations"]],
-    indirect=True,
-)
 @patch("logging.info")
-def test_given_good_input_entry_with_location_id_when_making_mlwh_entry_then_check_entry_written_correctly(
+def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_entry_written_correctly(
     mock_info,
     config,
+    lw_database,
     mlwh_database,
-    mlwh_labware_locations_table,
-    labware_location_columns,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=good_input_entry_with_location_input["labwares"],
+        audits_entries=good_input_entry_with_location_input["audits"],
+        users_entries=good_input_entry_with_location_input["users"],
+        locations_entries=good_input_entry_with_location_input["locations"],
+    )
     sync_changes_from_labwhere(config)
+
     result = mlwh_database.execute_query("SELECT * FROM labware_location", {})[0]
     actual_result = parse_entry(result, labware_location_columns)
     expected_result = good_input_entry_with_location_output["labware_location"][0]
@@ -94,45 +247,25 @@ def test_given_good_input_entry_with_location_id_when_making_mlwh_entry_then_che
     )
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [good_input_entry_with_coordinates_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [good_input_entry_with_coordinates_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [good_input_entry_with_coordinates_input["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [good_input_entry_with_coordinates_input["locations"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [good_input_entry_with_coordinates_input["coordinates"]],
-    indirect=True,
-)
 @patch("logging.info")
-def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_check_entry_written_correctly(
+def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_check_entry_written_correctly(
     mock_info,
     config,
+    lw_database,
     mlwh_database,
-    mlwh_labware_locations_table,
-    labware_location_columns,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=good_input_entry_with_coordinates_input["labwares"],
+        audits_entries=good_input_entry_with_coordinates_input["audits"],
+        users_entries=good_input_entry_with_coordinates_input["users"],
+        locations_entries=good_input_entry_with_coordinates_input["locations"],
+        coordinates_entries=good_input_entry_with_coordinates_input["coordinates"],
+    )
     sync_changes_from_labwhere(config)
+
     result = mlwh_database.execute_query("SELECT * FROM labware_location", {})[0]
     actual_result = parse_entry(result, labware_location_columns)
     expected_result = good_input_entry_with_coordinates_output["labware_location"][0]
@@ -158,40 +291,24 @@ def test_given_good_input_entry_with_coordinate_id_when_making_mlwh_entry_then_c
     )
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [good_input_entry_with_two_audits_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [good_input_entry_with_two_audits_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [good_input_entry_with_two_audits_input["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [good_input_entry_with_two_audits_input["locations"]],
-    indirect=True,
-)
 @patch("logging.info")
 def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_check_latest_audit_used(
     mock_info,
     config,
+    lw_database,
     mlwh_database,
-    mlwh_labware_locations_table,
-    labware_location_columns,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=good_input_entry_with_two_audits_input["labwares"],
+        audits_entries=good_input_entry_with_two_audits_input["audits"],
+        users_entries=good_input_entry_with_two_audits_input["users"],
+        locations_entries=good_input_entry_with_two_audits_input["locations"],
+    )
     sync_changes_from_labwhere(config)
+
     result = mlwh_database.execute_query("SELECT * FROM labware_location", {})[0]
     actual_result = parse_entry(result, labware_location_columns)
     expected_result = good_input_entry_with_two_audits_output["labware_location"][0]
@@ -217,45 +334,25 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     )
 
 
-@pytest.mark.parametrize(
-    "mlwh_labware_locations_table",
-    [good_input_entry_outdated_record_in_mlwh_output["labware_location"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [good_input_entry_outdated_record_in_mlwh_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [good_input_entry_outdated_record_in_mlwh_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [good_input_entry_outdated_record_in_mlwh_input["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [good_input_entry_outdated_record_in_mlwh_input["locations"]],
-    indirect=True,
-)
 @patch("logging.info")
-def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
+def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
     mock_info,
     config,
+    lw_database,
     mlwh_database,
-    mlwh_labware_locations_table,
-    labware_location_columns,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=good_input_entry_outdated_record_in_mlwh_input["labwares"],
+        audits_entries=good_input_entry_outdated_record_in_mlwh_input["audits"],
+        users_entries=good_input_entry_outdated_record_in_mlwh_input["users"],
+        locations_entries=good_input_entry_outdated_record_in_mlwh_input["locations"],
+        labware_location_entries=good_input_entry_outdated_record_in_mlwh_input["labware_location"],
+    )
     sync_changes_from_labwhere(config)
+
     result = mlwh_database.execute_query("SELECT * FROM labware_location", {})[0]
     actual_result = parse_entry(result, labware_location_columns)
     expected_result = good_input_entry_outdated_record_in_mlwh_output["labware_location"][0]
@@ -281,35 +378,25 @@ def test_given_good_outdated_entry_in_mlwh_when_checking_entries_then_check_entr
     )
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [bad_input_entry_without_location_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [bad_input_entry_without_location_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [bad_input_entry_without_location_input["users"]],
-    indirect=True,
-)
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_when_making_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
     config,
-    mlwh_labware_locations_table,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
+    lw_database,
+    mlwh_database,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=bad_input_entry_without_location_input["labwares"],
+        audits_entries=bad_input_entry_without_location_input["audits"],
+        users_entries=bad_input_entry_without_location_input["users"],
+    )
     sync_changes_from_labwhere(config)
+
     assert mock_info.has_calls(
         call("Starting sync labware locations task..."),
         call("Updating 0 rows..."),
@@ -317,35 +404,27 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
         call("Task successful!"),
     )
 
-    bad_entry = bad_input_entry_without_location_input["labwares"][0]
-
-    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
+    assert mock_error.has_calls(call(f"Found invalid entry: {bad_input_entry_without_location_input['labwares'][0]}"))
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [bad_input_entry_without_audits_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [bad_input_entry_without_audits_input["locations"]],
-    indirect=True,
-)
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
     config,
-    mlwh_labware_locations_table,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
+    lw_database,
+    mlwh_database,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=bad_input_entry_without_audits_input["labwares"],
+        locations_entries=bad_input_entry_without_audits_input["locations"],
+    )
     sync_changes_from_labwhere(config)
+
     assert mock_info.has_calls(
         call("Starting sync labware locations task..."),
         call("Updating 0 rows..."),
@@ -353,30 +432,26 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
         call("Task successful!"),
     )
 
-    bad_entry = bad_input_entry_without_audits_input["labwares"][0]
-
-    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
+    assert mock_error.has_calls(call(f"Found invalid entry: {bad_input_entry_without_audits_input['labwares'][0]}"))
 
 
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [bad_input_entry_without_location_without_audits_input["labwares"]],
-    indirect=True,
-)
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_without_audits_when_sorting_entries_then_check_entry_filtered_out(
     mock_info,
     mock_error,
     config,
-    mlwh_labware_locations_table,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
+    lw_database,
+    mlwh_database,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=bad_input_entry_without_location_without_audits_input["labwares"],
+    )
     sync_changes_from_labwhere(config)
+
     assert mock_info.has_calls(
         call("Starting sync labware locations task..."),
         call("Updating 0 rows..."),
@@ -384,52 +459,32 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
         call("Task successful!"),
     )
 
-    bad_entry = bad_input_entry_without_location_without_audits_input["labwares"][0]
+    assert mock_error.has_calls(
+        call(f"Found invalid entry: {bad_input_entry_without_location_without_audits_input['labwares'][0]}")
+    )
 
-    assert mock_error.has_calls(call(f"Found invalid entry: {bad_entry}"))
 
-
-@pytest.mark.parametrize(
-    "lw_labwares_table",
-    [mixed_entries_input["labwares"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_audits_table",
-    [mixed_entries_input["audits"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_users_table",
-    [mixed_entries_input["users"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_locations_table",
-    [mixed_entries_input["locations"]],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    "lw_coordinates_table",
-    [mixed_entries_input["coordinates"]],
-    indirect=True,
-)
 @patch("logging.info")
 @patch("logging.error")
 def test_given_mixed_entries_when_writing_entries_then_check_all_entries_processed_correctly(
     mock_info,
     mock_error,
     config,
+    lw_database,
     mlwh_database,
-    mlwh_labware_locations_table,
-    labware_location_columns,
-    lw_labwares_table,
-    lw_audits_table,
-    lw_users_table,
-    lw_locations_table,
-    lw_coordinates_table,
 ):
+    clear_tables(lw_database, mlwh_database)
+    write_to_tables(
+        lw_database,
+        mlwh_database,
+        labwares_entries=mixed_entries_input["labwares"],
+        audits_entries=mixed_entries_input["audits"],
+        users_entries=mixed_entries_input["users"],
+        locations_entries=mixed_entries_input["locations"],
+        coordinates_entries=mixed_entries_input["coordinates"],
+    )
     sync_changes_from_labwhere(config)
+
     good_entries = mlwh_database.execute_query("SELECT * FROM labware_location", {})
     for result_index in range(len(good_entries)):
         actual_result = parse_entry(good_entries[result_index], labware_location_columns)
