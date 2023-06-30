@@ -44,80 +44,6 @@ labware_location_columns = [
 ]
 
 
-def clear_tables(lw_database: Database, mlwh_database: Database) -> None:
-    """
-    Clear all the tables in the LabWhere and MLWH databases.
-
-    Parameters:
-        lw_database {Database}: LabWhere database
-        mlwh_database {Database}: MLWH database
-    """
-    # Labwares table
-    drop_table_query = "DROP TABLE IF EXISTS labwares;"
-    lw_database.execute_query(drop_table_query, {})
-
-    labwares_cols = "id int(11) primary key, barcode varchar(255), location_id int(11), coordinate_id int(11)"
-    create_table_query = f"CREATE TABLE labwares ({labwares_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Audits table
-    drop_table_query = "DROP TABLE IF EXISTS audits;"
-    lw_database.execute_query(drop_table_query, {})
-
-    audits_cols = """
-    id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)
-    """
-    create_table_query = f"CREATE TABLE audits ({audits_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Users table
-    drop_table_query = "DROP TABLE IF EXISTS users;"
-    lw_database.execute_query(drop_table_query, {})
-
-    users_cols = "id int(11) primary key, login varchar(255)"
-    create_table_query = f"CREATE TABLE users ({users_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Locations table
-    drop_table_query = "DROP TABLE IF EXISTS locations;"
-    lw_database.execute_query(drop_table_query, {})
-
-    locations_cols = "id int(11) primary key, barcode varchar(255), parentage varchar(255)"
-    create_table_query = f"CREATE TABLE locations ({locations_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Coordinates table
-    drop_table_query = "DROP TABLE IF EXISTS coordinates;"
-    lw_database.execute_query(drop_table_query, {})
-
-    coordinates_cols = (
-        "id int(11) primary key, `position` int(11), `row` int(11), `column` int(11), location_id int(11)"
-    )
-    create_table_query = f"CREATE TABLE coordinates ({coordinates_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Labware location table
-    drop_table_query = "DROP TABLE IF EXISTS labware_location;"
-    mlwh_database.execute_query(drop_table_query, {})
-
-    labware_location_cols = """
-        id int(11) primary key NOT NULL AUTO_INCREMENT,
-        labware_barcode varchar(255) NOT NULL UNIQUE,
-        location_barcode varchar(255) NOT NULL,
-        full_location_address varchar(255) NOT NULL,
-        coordinate_position int(11),
-        coordinate_row int(11),
-        coordinate_column int(11),
-        lims_id varchar(255) NOT NULL,
-        stored_by varchar(255) NOT NULL,
-        stored_at datetime(6) NOT NULL,
-        created_at datetime(6) NOT NULL,
-        updated_at datetime(6) NOT NULL
-    """
-    create_table_query = f"CREATE TABLE labware_location ({labware_location_cols});"
-    mlwh_database.execute_query(create_table_query, {})
-
-
 def write_to_tables(
     lw_database: Database,
     mlwh_database: Database,
@@ -210,8 +136,8 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
     config,
     lw_database,
     mlwh_database,
+    clear_tables,
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -249,12 +175,8 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
 
 @patch("logging.info")
 def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_check_entry_written_correctly(
-    mock_info,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -293,12 +215,8 @@ def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_che
 
 @patch("logging.info")
 def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_check_latest_audit_used(
-    mock_info,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -336,12 +254,8 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
 
 @patch("logging.info")
 def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
-    mock_info,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -381,13 +295,8 @@ def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_th
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_when_making_sorting_entries_then_check_entry_filtered_out(
-    mock_info,
-    mock_error,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -410,13 +319,8 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_entry_filtered_out(
-    mock_info,
-    mock_error,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -438,13 +342,8 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_without_audits_when_sorting_entries_then_check_entry_filtered_out(
-    mock_info,
-    mock_error,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
@@ -467,13 +366,8 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
 @patch("logging.info")
 @patch("logging.error")
 def test_given_mixed_entries_when_writing_entries_then_check_all_entries_processed_correctly(
-    mock_info,
-    mock_error,
-    config,
-    lw_database,
-    mlwh_database,
+    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
 ):
-    clear_tables(lw_database, mlwh_database)
     write_to_tables(
         lw_database,
         mlwh_database,
