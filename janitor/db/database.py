@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Sequence, cast
+from typing import Any, Dict, Mapping, Sequence, cast
 
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
@@ -71,14 +71,14 @@ class Database:
     def write_entries_to_table(
         self,
         query: str,
-        entries: List[Dict[str, Any]],
+        entries: Sequence[Mapping[str, Any]],
         rows_per_query: int,
     ) -> None:
         """Add or update entries to table in batches.
 
         Arguments:
             query {str}: SQL query to execute against table
-            values {List[Dict[str, Any]]}: list of parsed entries to add to table
+            entries {Sequence[Mapping[str, Any]]}: list of parsed entries to add to table
             rows_per_query {int}: number of rows per batch
         """
         try:

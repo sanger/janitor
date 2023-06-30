@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping, Sequence
 
 
 def load_query(filepath: Path) -> str:
@@ -28,12 +28,12 @@ def parse_entry(entry: List[Any], column_names: List[str]) -> Dict[str, Any]:
     return dict(zip(column_names, entry))
 
 
-def list_of_entries_values(entries: List[Dict[str, Any]]) -> List[List[Any]]:
+def list_of_entries_values(entries: Sequence[Mapping[str, Any]]) -> List[List[Any]]:
     """
     Unpack the values of parsed entry dictionaries in a batch of entries.
 
     Arguments:
-        entries {List[Dict[str, Any]]}: entries to be unpacked
+        entries {Sequence[Mapping[str, Any]]}: entries to be unpacked
 
     Returns:
         values {List[List[Any]]}: list of unpacked entries
