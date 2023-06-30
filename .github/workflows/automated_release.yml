@@ -1,0 +1,92 @@
+name: Automated build, test, release and push
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+env:
+  IMAGE_NAME: ${{ github.repository }}/${{ github.event.repository.name }}
+
+jobs:
+  build_test_release_push:
+    permissions: 
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: nelonoel/branch-name@v1.0.1
+
+      - name: Build and tag the image for testing and release
+        run: >-
+          docker build .
+          --file Dockerfile
+          --tag docker.pkg.github.com/${IMAGE_NAME}:${BRANCH_NAME}
+
+      - name: Set up MySQL databases
+        run: |
+          mysql -e 'CREATE DATABASE janitor_tests_lw_input;' -uroot -h '127.0.0.1'
+          mysql -e 'CREATE DATABASE janitor_tests_mlwh_output;' -uroot -h '127.0.0.1'
+
+      - name: Run tests against the image
+        run: >-
+          docker run
+          --network host
+          --entrypoint ''
+          --env SETTINGS_MODULE=janitor.config.test
+          docker.pkg.github.com/${IMAGE_NAME}:${BRANCH_NAME}
+          python -m pytest --no-cov -vx
+
+      - name: Set release name
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        run: echo "RELEASE_NAME=$(printf -- '%s%s\n' $(cat .release-version) $([ ${BRANCH_NAME} = "develop" ] && printf -- '-%s-develop' ${GITHUB_RUN_ID} || echo ""))" >> $GITHUB_ENV
+
+      - name: Set release tag
+        run: echo "RELEASE_TAG=v$RELEASE_NAME" >> $GITHUB_ENV
+
+      - name: Create release
+        uses: ncipollo/release-action@v1.8.8
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          tag: ${{ env.RELEASE_TAG }}
+          prerelease: ${{ !(github.ref == 'refs/heads/main') }}
+          commit: ${{ github.sha }}
+
+      - name: Login to registry
+        run: >-
+          docker login
+          -u ${{ github.actor }}
+          -p ${{ secrets.GITHUB_TOKEN }}
+          docker.pkg.github.com
+
+      - name: Tag image with release version
+        run: >-
+          docker tag
+          docker.pkg.github.com/${IMAGE_NAME}:${BRANCH_NAME}
+          docker.pkg.github.com/${IMAGE_NAME}:${{ env.RELEASE_TAG }}
+
+      - name: Push release tag image to registry
+        run: >-
+          docker push docker.pkg.github.com/${IMAGE_NAME}:${{ env.RELEASE_TAG }}
+
+      - name: Remove old releases
+        uses: snok/container-retention-policy@v2
+        with:
+          image-names: ${{ github.event.repository.name }}/*
+          cut-off: Four months ago UTC
+          timestamp-to-use: updated_at
+          account-type: org
+          org-name: sanger
+          keep-at-least: 5
+          skip-tags: latest
+          token: ${{ secrets.REMOVE_OLD_IMAGES }}

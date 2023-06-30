@@ -1,0 +1,20 @@
+version: "3.3"
+services:
+  # Setup the runner
+  # we need to set the localhost as it can be different
+  janitor:
+    build: .
+    environment:
+      - LOCALHOST=host.docker.internal
+      - SETTINGS_MODULE=janitor.config.development
+
+    volumes:
+      - ".:/code"
+
+    networks:
+      - default
+      - heron_databases_external
+
+networks:
+  heron_databases_external:
+    external: true
