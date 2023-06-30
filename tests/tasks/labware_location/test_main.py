@@ -116,10 +116,7 @@ def write_to_tables(
 
 
 @patch("logging.info")
-def test_given_valid_db_details_when_connecting_to_db_then_check_connection_successful(
-    mock_info,
-    config,
-):
+def test_given_valid_db_details_when_connecting_to_db_then_check_connection_successful(mock_info, config):
     sync_changes_from_labwhere(config)
 
     assert mock_info.has_calls(
@@ -132,11 +129,7 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
 
 @patch("logging.info")
 def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_entry_written_correctly(
-    mock_info,
-    config,
-    lw_database,
-    mlwh_database,
-    clear_tables,
+    mock_info, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -175,7 +168,7 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
 
 @patch("logging.info")
 def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_check_entry_written_correctly(
-    mock_info, config, lw_database, mlwh_database, clear_tables
+    mock_info, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -215,7 +208,7 @@ def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_che
 
 @patch("logging.info")
 def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_check_latest_audit_used(
-    mock_info, config, lw_database, mlwh_database, clear_tables
+    mock_info, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -254,7 +247,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
 
 @patch("logging.info")
 def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_then_check_entry_updated_correctly(
-    mock_info, config, lw_database, mlwh_database, clear_tables
+    mock_info, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -295,7 +288,7 @@ def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_th
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_when_making_sorting_entries_then_check_entry_filtered_out(
-    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
+    mock_info, mock_error, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -319,7 +312,7 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_entry_filtered_out(
-    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
+    mock_info, mock_error, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -342,7 +335,7 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
 @patch("logging.info")
 @patch("logging.error")
 def test_given_bad_input_entry_without_location_without_audits_when_sorting_entries_then_check_entry_filtered_out(
-    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
+    mock_info, mock_error, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,
@@ -366,7 +359,7 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
 @patch("logging.info")
 @patch("logging.error")
 def test_given_mixed_entries_when_writing_entries_then_check_all_entries_processed_correctly(
-    mock_info, mock_error, config, lw_database, mlwh_database, clear_tables
+    mock_info, mock_error, config, lw_database, mlwh_database
 ):
     write_to_tables(
         lw_database,

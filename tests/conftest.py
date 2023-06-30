@@ -30,6 +30,7 @@ def mlwh_database(mlwh_creds):
 
     try:
         mysql_conn = Database(mlwh_creds)
+        clear_mlwh_tables(mysql_conn)
         yield mysql_conn
     finally:
         mysql_conn.close()
@@ -60,6 +61,7 @@ def lw_database(lw_creds):
 
     try:
         mysql_conn = Database(lw_creds)
+        clear_lw_tables(mysql_conn)
         yield mysql_conn
     finally:
         mysql_conn.close()
@@ -76,8 +78,7 @@ def lw_creds(config):
     )
 
 
-@pytest.fixture
-def clear_tables(lw_database, mlwh_database):
+def clear_lw_tables(lw_database):
     # Labwares table
     drop_table_query = "DROP TABLE IF EXISTS labwares;"
     lw_database.execute_query(drop_table_query, {})
@@ -122,6 +123,8 @@ def clear_tables(lw_database, mlwh_database):
     create_table_query = f"CREATE TABLE coordinates ({coordinates_cols});"
     lw_database.execute_query(create_table_query, {})
 
+
+def clear_mlwh_tables(mlwh_database):
     # Labware location table
     drop_table_query = "DROP TABLE IF EXISTS labware_location;"
     mlwh_database.execute_query(drop_table_query, {})
