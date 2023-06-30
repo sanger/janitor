@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Any, Dict
 
 from tests.types import (
     AuditsTableEntry,
@@ -23,7 +24,7 @@ def get_time(delta_mins: int) -> datetime:
     return (datetime.utcnow() - timedelta(minutes=delta_mins)).replace(microsecond=0, second=0)
 
 
-good_input_entry_with_location_input = {
+good_input_entry_with_location_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=1, barcode="labware1", location_id=1, coordinate_id=None)],
     "audits": [
         AuditsTableEntry(
@@ -38,7 +39,7 @@ good_input_entry_with_location_input = {
     "locations": [LocationsTableEntry(id=1, barcode="unordered_location1", parentage="PARENT / unordered_location1")],
 }
 
-good_input_entry_with_location_output = {
+good_input_entry_with_location_output: Dict[str, Any] = {
     "labware_location": [
         LabwareLocationTableEntry(
             id=1,
@@ -57,7 +58,7 @@ good_input_entry_with_location_output = {
     ]
 }
 
-good_input_entry_with_coordinates_input = {
+good_input_entry_with_coordinates_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=2, barcode="labware2", location_id=None, coordinate_id=2)],
     "audits": [
         AuditsTableEntry(
@@ -74,7 +75,7 @@ good_input_entry_with_coordinates_input = {
 }
 
 
-good_input_entry_with_coordinates_output = {
+good_input_entry_with_coordinates_output: Dict[str, Any] = {
     "labware_location": [
         LabwareLocationTableEntry(
             id=1,
@@ -93,7 +94,7 @@ good_input_entry_with_coordinates_output = {
     ]
 }
 
-good_input_entry_with_two_audits_input = {
+good_input_entry_with_two_audits_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=3, barcode="labware3", location_id=3, coordinate_id=None)],
     "audits": [
         AuditsTableEntry(
@@ -116,7 +117,7 @@ good_input_entry_with_two_audits_input = {
 }
 
 
-good_input_entry_with_two_audits_output = {
+good_input_entry_with_two_audits_output: Dict[str, Any] = {
     "labware_location": [
         LabwareLocationTableEntry(
             id=1,
@@ -135,7 +136,7 @@ good_input_entry_with_two_audits_output = {
     ]
 }
 
-good_input_entry_outdated_record_in_mlwh_input = {
+good_input_entry_outdated_record_in_mlwh_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=4, barcode="labware4", location_id=4, coordinate_id=None)],
     "audits": [
         AuditsTableEntry(
@@ -176,7 +177,7 @@ good_input_entry_outdated_record_in_mlwh_input = {
     ],
 }
 
-good_input_entry_outdated_record_in_mlwh_output = {
+good_input_entry_outdated_record_in_mlwh_output: Dict[str, Any] = {
     "labware_location": [
         LabwareLocationTableEntry(
             id=1,
@@ -196,7 +197,7 @@ good_input_entry_outdated_record_in_mlwh_output = {
 }
 
 
-bad_input_entry_without_location_input = {
+bad_input_entry_without_location_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=5, barcode="labware5", location_id=None, coordinate_id=None)],
     "audits": [
         AuditsTableEntry(
@@ -210,16 +211,16 @@ bad_input_entry_without_location_input = {
     "users": [UsersTableEntry(id=5, login="user5")],
 }
 
-bad_input_entry_without_audits_input = {
+bad_input_entry_without_audits_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=6, barcode="labware6", location_id=6, coordinate_id=None)],
     "locations": [LocationsTableEntry(id=6, barcode="unordered_location6", parentage="PARENT / unordered_location6")],
 }
 
-bad_input_entry_without_location_without_audits_input = {
+bad_input_entry_without_location_without_audits_input: Dict[str, Any] = {
     "labwares": [LabwaresTableEntry(id=7, barcode="labware7", location_id=None, coordinate_id=None)],
 }
 
-mixed_entries_input = {
+mixed_entries_input: Dict[str, Any] = {
     "labwares": [
         LabwaresTableEntry(id=1, barcode="labware1", location_id=1, coordinate_id=None),
         LabwaresTableEntry(id=2, barcode="labware2", location_id=None, coordinate_id=None),
@@ -284,7 +285,7 @@ mixed_entries_input = {
     "coordinates": [CoordinatesTableEntry(id=2, position=1, row=1, column=1, location_id=2)],
 }
 
-mixed_entries_output = {
+mixed_entries_output: Dict[str, Any] = {
     "labware_location": [
         LabwareLocationTableEntry(
             id=1,
