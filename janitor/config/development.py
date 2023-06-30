@@ -1,2 +1,1 @@
-# flake8: noqa
-from .defaults import *
+from .defaults import *  # noqa: F401, F403
