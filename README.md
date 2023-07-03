@@ -26,7 +26,7 @@ The following tools are required for development:
 - Python (use a tool like `pyenv` to install the required version specified in the `Pipfile`)
 - Install dependencies using [pipenv](https://github.com/pypa/pipenv):
 
-        brew install pipenv
+    brew install pipenv
 
 ### Installing Dependencies
 
