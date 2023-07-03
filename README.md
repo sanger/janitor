@@ -15,6 +15,7 @@ The application uses APScheduler to schedule and run these tasks.
 - [Testing](#testing)
 - [Formatting, Type Checking and Linting](#formatting-type-checking-and-linting)
 - [Deployment](#deployment)
+- [Updating the Table of Contents](#updating-the-table-of-contents)
 
 
 ## Getting Started
@@ -92,3 +93,9 @@ All three tools can be run by executing:
 This application gets deployed as a Docker image.
 The `.release-version` uses SemVer (major/minor/patch).
 Merging a pull request into *develop* or *main* creates a release with an associated Docker image.
+
+## Updating the Table of Contents
+
+Node is required to run npx:
+
+    npx markdown-toc -i README.md
