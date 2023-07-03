@@ -38,11 +38,8 @@ Install the required dependencies:
 
 ### Configuring the Environment
 
-The app can be configured to run with development settings by adding
-
-    SETTINGS_MODULE=janitor.config.development
-
-to a `.env` file.
+The app uses a `.env` file for configuration settings.
+The `.env.example` file can be copied and renamed to `.env` to load in those environment variables.
 
 ## Running the Application
 
