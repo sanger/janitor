@@ -1,7 +1,7 @@
 <!-- omit from toc -->
 # Janitor
 A Python application which hosts task scripts for data management and clean up tasks, running them on a schedule.
-The application uses APScheduler to schedule and run these tasks.
+The application uses [APScheduler](https://apscheduler.readthedocs.io/en/3.x/) to schedule and run these tasks.
 
 <!-- omit from toc -->
 ## Table of Contents
@@ -59,7 +59,7 @@ This will start the APScheduler and run the scheduled tasks.
 ### Adding Tasks
 
 Tasks can be added by creating scripts in the `janitor/tasks` directory, wrapping your task in a function and importing that to `run.py`.
-The task can then be scheduled to run by using `sched.add_job(...)`.
+The task can then be scheduled to run by using `sched.add_job(...)` (see [documentation](https://apscheduler.readthedocs.io/en/3.x/userguide.html#adding-jobs)).
 
 ## Testing
 
