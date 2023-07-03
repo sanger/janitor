@@ -91,6 +91,9 @@ This application gets deployed as a Docker image.
 The `.release-version` uses SemVer (major/minor/patch).
 Merging a pull request into *develop* or *main* creates a release with an associated Docker image.
 
+The [deployment](https://github.com/sanger/deployment) repository is used to deploy the application.
+The instructions for doing so can be found in `deploy_janitor.yml`.
+
 ## Updating the Table of Contents
 
 Node is required to run npx:
