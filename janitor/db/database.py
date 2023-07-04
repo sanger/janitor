@@ -71,6 +71,7 @@ class Database:
                 with self.connection.cursor() as cursor:
                     cursor.execute(query, params)
                     results = cursor.fetchall()
+                    self.connection.commit()
             except Exception as e:
                 logger.error(f"Exception on executing query: {e}")
 
