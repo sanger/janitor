@@ -88,18 +88,17 @@ class Database:
             entries {Sequence[Mapping[str, Any]]}: list of parsed entries to add to table
             rows_per_query {int}: number of rows per batch
         """
-        try:
-            self.connection.start_transaction()
-            num_entries = len(entries)
-            entries_index = 0
+        num_entries = len(entries)
+        index = 0
 
+        try:
             with self.connection.cursor() as cursor:
-                while entries_index < num_entries:
-                    cursor.executemany(
-                        query,
-                        list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
-                    )
-                    entries_index += rows_per_query
+                self.connection.start_transaction()
+
+                while index < num_entries:
+                    entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
+                    cursor.executemany(query, entries_batch)
+                    index += rows_per_query
 
             self.connection.commit()
         except Exception as e:
