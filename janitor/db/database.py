@@ -92,9 +92,8 @@ class Database:
         index = 0
 
         try:
+            self.connection.start_transaction()
             with self.connection.cursor() as cursor:
-                self.connection.start_transaction()
-
                 while index < num_entries:
                     entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
                     cursor.executemany(query, entries_batch)
