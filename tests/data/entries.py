@@ -171,8 +171,8 @@ good_input_entry_outdated_record_in_mlwh_input: Dict[str, Any] = {
             lims_id="LabWhere",
             stored_by="user3",
             stored_at=get_time(delta_mins=4),
-            created_at=get_time(delta_mins=0),
-            updated_at=get_time(delta_mins=0),
+            created_at=get_time(delta_mins=4),
+            updated_at=get_time(delta_mins=4),
         )
     ],
 }
@@ -190,7 +190,7 @@ good_input_entry_outdated_record_in_mlwh_output: Dict[str, Any] = {
             lims_id="LabWhere",
             stored_by="user4",
             stored_at=get_time(delta_mins=2),
-            created_at=get_time(delta_mins=0),
+            created_at=get_time(delta_mins=4),
             updated_at=get_time(delta_mins=0),
         )
     ]
