@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Mapping, Sequence, cast
+from typing import Any, Dict, Mapping, Optional, Sequence, cast
 
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
@@ -18,15 +18,15 @@ class Database:
             creds {DbConnectionDetails}: details for database connection
         """
         self.creds = creds
-        self._connection = cast(MySQLConnectionAbstract, None)
+        self._connection: Optional[MySQLConnectionAbstract] = None
 
     @property
-    def connection(self) -> MySQLConnectionAbstract:
+    def connection(self) -> Optional[MySQLConnectionAbstract]:
         """Database connection, attempt to connect if not connected."""
         if self._connection is not None:
             return self._connection
 
-        logger.info(f"Attempting to connect to {self.creds['host']} on port {self.creds['port']}...")  # type: ignore
+        logger.info(f"Attempting to connect to {self.creds['host']} on port {self.creds['port']}...")
 
         try:
             connection = mysql.connect(
@@ -49,8 +49,8 @@ class Database:
     def close(self) -> None:
         """Close connection to database."""
         try:
-            if self.connection.is_connected():
-                self.connection.close()
+            if self._connection is not None and self._connection.is_connected():
+                self._connection.close()
         except Exception as e:
             logger.error(f"Exception on closing connection: {e}")
 
@@ -64,14 +64,15 @@ class Database:
         Returns:
             results {Sequence[Any]}: list of queried results
         """
-        logger.info(f"Executing query: {query}")
         results = cast(Sequence, [])
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute(query, params)
-                results = cursor.fetchall()
-        except Exception as e:
-            logger.error(f"Exception on executing query: {e}")
+        if self.connection:
+            logger.info(f"Executing query: {query}")
+            try:
+                with self.connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                    results = cursor.fetchall()
+            except Exception as e:
+                logger.error(f"Exception on executing query: {e}")
 
         return results
 
@@ -91,14 +92,15 @@ class Database:
         num_entries = len(entries)
         index = 0
 
-        try:
-            self.connection.start_transaction()
-            with self.connection.cursor() as cursor:
-                while index < num_entries:
-                    entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
-                    cursor.executemany(query, entries_batch)
-                    index += rows_per_query
+        if self.connection:
+            try:
+                self.connection.start_transaction()
+                with self.connection.cursor() as cursor:
+                    while index < num_entries:
+                        entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
+                        cursor.executemany(query, entries_batch)
+                        index += rows_per_query
 
-            self.connection.commit()
-        except Exception as e:
-            logger.error(f"Exception on writing entries: {e}")
+                self.connection.commit()
+            except Exception as e:
+                logger.error(f"Exception on writing entries: {e}")
