@@ -17,34 +17,42 @@ class Database:
         Arguments:
             creds {DbConnectionDetails}: details for database connection
         """
-        logger.info(f"Attempting to connect to {creds['host']} on port {creds['port']}...")
+        self.creds = creds
+        self._connection = cast(MySQLConnectionAbstract, None)
+
+    @property
+    def connection(self) -> MySQLConnectionAbstract:
+        """Database connection, attempt to connect if not connected."""
+        if self._connection is not None:
+            return self._connection
+
+        logger.info(f"Attempting to connect to {self.creds['host']} on port {self.creds['port']}...")  # type: ignore
 
         try:
             connection = mysql.connect(
-                host=creds["host"],
-                port=creds["port"],
-                database=creds["db_name"],
-                username=creds["username"],
-                password=creds["password"],
+                host=self.creds["host"],
+                port=self.creds["port"],
+                database=self.creds["db_name"],
+                username=self.creds["username"],
+                password=self.creds["password"],
             )
 
-            if connection is not None:
-                if connection.is_connected():
-                    logger.info(f"MySQL connection to {creds['db_name']} successful!")
-                    self.connection = cast(MySQLConnectionAbstract, connection)
-                    self.cursor = self.connection.cursor()
-                else:
-                    logger.error("MySQL connection failed!")
+            if not connection.is_connected():
+                logger.error("MySQL connection failed!")
+
+            logger.info(f"MySQL connection to {self.creds['db_name']} successful!")
+            self._connection = cast(MySQLConnectionAbstract, connection)
 
         except mysql.Error as e:
             logger.error(f"Exception on connecting to MySQL database: {e}")
+
+        return self._connection
 
     def close(self) -> None:
         """Close connection to database."""
         try:
             if self.connection.is_connected():
                 self.connection.close()
-                self.cursor.close()
         except Exception as e:
             logger.error(f"Exception on closing connection: {e}")
 
@@ -61,8 +69,9 @@ class Database:
         logger.info(f"Executing query: {query}")
         results = cast(Sequence, [])
         try:
-            self.cursor.execute(query, params)
-            results = self.cursor.fetchall()
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params)
+                results = cursor.fetchall()
         except Exception as e:
             logger.error(f"Exception on executing query: {e}")
 
@@ -86,12 +95,13 @@ class Database:
             num_entries = len(entries)
             entries_index = 0
 
-            while entries_index < num_entries:
-                self.cursor.executemany(
-                    query,
-                    list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
-                )
-                entries_index += rows_per_query
+            with self.connection.cursor() as cursor:
+                while entries_index < num_entries:
+                    cursor.executemany(
+                        query,
+                        list_of_entries_values(entries[entries_index : entries_index + rows_per_query]),  # noqa
+                    )
+                    entries_index += rows_per_query
 
             self.connection.commit()
         except Exception as e:
