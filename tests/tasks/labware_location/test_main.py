@@ -116,7 +116,9 @@ def write_to_tables(
 
 
 @patch("logging.info")
-def test_given_valid_db_details_when_connecting_to_db_then_check_connection_successful(mock_info, config):
+def test_given_valid_db_details_when_connecting_to_db_then_check_connection_successful(
+    mock_info, config, mlwh_database
+):
     sync_changes_from_labwhere(config)
 
     assert mock_info.has_calls(
