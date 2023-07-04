@@ -15,7 +15,6 @@ def test_given_invalid_connection_when_connecting_to_db_then_check_error_message
     with patch("mysql.connector.connect", side_effect=mysql.connector.Error()):
         Database(test_config)
         assert mock_error.has_calls(
-            call("MySQL connection failed!"),
             call(f"Exception on connecting to MySQL database: {mysql.connector.Error()}"),
         )
 

@@ -37,11 +37,9 @@ class Database:
                 password=self.creds["password"],
             )
 
-            if not connection.is_connected():
-                logger.error("MySQL connection failed!")
-
-            logger.info(f"MySQL connection to {self.creds['db_name']} successful!")
-            self._connection = cast(MySQLConnectionAbstract, connection)
+            if connection.is_connected():
+                logger.info(f"MySQL connection to {self.creds['db_name']} successful!")
+                self._connection = cast(MySQLConnectionAbstract, connection)
 
         except mysql.Error as e:
             logger.error(f"Exception on connecting to MySQL database: {e}")
