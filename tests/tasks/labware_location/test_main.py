@@ -2,6 +2,7 @@ from typing import List, Optional
 from unittest.mock import call, patch
 
 import pytest
+from mysql.connector.errors import DatabaseError
 
 from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import parse_entry
@@ -136,7 +137,7 @@ def test_given_valid_connection_and_deleting_db_when_attempting_sync_then_check_
     mock_error, config, mlwh_database
 ):
     mlwh_database.execute_query(f"DROP DATABASE {config.MLWH_DB['db_name']}", {})
-    with pytest.raises(IndexError) as error:
+    with pytest.raises(DatabaseError) as error:
         sync_changes_from_labwhere(config)
 
     assert mock_error.has_calls(
