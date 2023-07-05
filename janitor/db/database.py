@@ -40,6 +40,8 @@ class Database:
             if connection.is_connected():
                 logger.info(f"MySQL connection to {self.creds['db_name']} successful!")
                 self._connection = cast(MySQLConnectionAbstract, connection)
+            else:
+                logger.error(f"MySQL connection to {self.creds['db_name']} failed!")
 
         except mysql.Error as e:
             logger.error(f"Exception on connecting to MySQL database: {e}")
@@ -71,6 +73,7 @@ class Database:
                 with self.connection.cursor() as cursor:
                     cursor.execute(query, params)
                     results = cursor.fetchall()
+                    self.connection.commit()
             except Exception as e:
                 logger.error(f"Exception on executing query: {e}")
 

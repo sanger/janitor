@@ -7,7 +7,6 @@ from .logging import *  # noqa: F401, F403
 LOCALHOST = os.environ.get("LOCALHOST", "127.0.0.1")
 
 SYNC_JOB_INTERVAL_SEC = 300
-SYNC_JOB_OVERLAP_SEC = 10
 
 LABWHERE_DB = DbConnectionDetails(
     db_name="labwhere_prod",
