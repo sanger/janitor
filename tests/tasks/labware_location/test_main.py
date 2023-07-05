@@ -148,7 +148,7 @@ def test_given_valid_connection_and_deleting_db_when_attempting_sync_then_check_
 def test_given_valid_connection_and_deleting_labware_location_table_when_attempting_sync_then_check_exception_raised(
     mock_error, config, mlwh_database
 ):
-    mlwh_database.execute_query(f"DROP TABLE labware_location", {})
+    mlwh_database.execute_query("DROP TABLE labware_location", {})
     with pytest.raises(IndexError) as error:
         sync_changes_from_labwhere(config)
 
