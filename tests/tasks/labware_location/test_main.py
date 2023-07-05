@@ -1,6 +1,8 @@
 from typing import List, Optional
 from unittest.mock import call, patch
 
+import pytest
+
 from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
@@ -126,6 +128,32 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
         call(f"MySQL connection to {config.LABWHERE_DB['db_name']} successful!"),
         call(f"Attempting to connect to {config.MLWH_DB['host']} on port {config.MLWH_DB['host']}..."),
         call(f"MySQL connection to {config.MLWH_DB['db_name']} successful!"),
+    )
+
+
+@patch("logging.error")
+def test_given_valid_connection_and_deleting_db_when_attempting_sync_then_check_exception_raised(
+    mock_error, config, mlwh_database
+):
+    mlwh_database.execute_query(f"DROP DATABASE {config.MLWH_DB['db_name']}", {})
+    with pytest.raises(IndexError) as error:
+        sync_changes_from_labwhere(config)
+
+    assert mock_error.has_calls(
+        call(f"Exception on querying labware_location: {error}"),
+    )
+
+
+@patch("logging.error")
+def test_given_valid_connection_and_deleting_labware_location_table_when_attempting_sync_then_check_exception_raised(
+    mock_error, config, mlwh_database
+):
+    mlwh_database.execute_query(f"DROP TABLE labware_location", {})
+    with pytest.raises(IndexError) as error:
+        sync_changes_from_labwhere(config)
+
+    assert mock_error.has_calls(
+        call(f"Exception on querying labware_location: {error}"),
     )
 
 
