@@ -31,6 +31,18 @@ def test_given_invalid_connection_when_closing_connection_then_check_error_messa
 
 
 @patch("logging.error")
+def test_given_valid_connection_details_when_connection_fails_then_check_error_message_logged(mock_error, config):
+    with patch("mysql.connector.connect") as mock_connect:
+        mock_connect.return_value.is_connected.return_value = False
+        test_db = Database(test_config)
+
+        assert test_db.connection is None
+        assert mock_error.has_calls(
+            call(f"MySQL connection to {config.MLWH_DB['db_name']} failed!"),
+        )
+
+
+@patch("logging.error")
 def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error):
     with patch("mysql.connector.cursor") as mock_cursor:
         mock_cursor.return_value.execute.return_value = AttributeError("Database not connected")
