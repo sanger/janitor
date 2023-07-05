@@ -1,6 +1,8 @@
 from unittest.mock import call, patch
 
 import mysql.connector
+import pytest
+from mysql.connector.errors import DatabaseError
 
 from janitor.db.database import Database
 from janitor.types import DbConnectionDetails
@@ -43,22 +45,44 @@ def test_given_valid_connection_details_when_connection_fails_then_check_error_m
 
 
 @patch("logging.error")
-def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error):
+def test_given_error_when_executing_sql_query_then_check_error_message_logged(mock_error, config):
     with patch("mysql.connector.cursor") as mock_cursor:
-        mock_cursor.return_value.execute.return_value = AttributeError("Database not connected")
-        test_db = Database(test_config)
+        mock_cursor.return_value.execute.return_value = DatabaseError("Error executing query")
+        test_db = Database(config.MLWH_DB)
         test_db.execute_query("query", {})
         assert mock_error.has_calls(
-            call(f"Exception on executing query:  {AttributeError('Database not connected')}"),
+            call(f"Exception on executing query:  {DatabaseError('Error executing query')}"),
         )
 
 
 @patch("logging.error")
-def test_given_error_when_writing_to_table_then_check_error_message_logged(mock_error):
+def test_given_no_db_connection_when_executing_query_then_check_error_message_logged(mock_error):
+    with pytest.raises(DatabaseError):
+        test_db = Database(test_config)
+        test_db.execute_query("query", {})
+
+    assert mock_error.has_calls(
+        call(f"Exception on executing query:  {DatabaseError('Not connected to database!')}"),
+    )
+
+
+@patch("logging.error")
+def test_given_error_when_writing_to_table_then_check_error_message_logged(mock_error, config):
     with patch("mysql.connector.cursor") as mock_cursor:
         mock_cursor.return_value.executemany.return_value = AttributeError("Database not connected")
-        test_db = Database(test_config)
+        test_db = Database(config.MLWH_DB)
         test_db.write_entries_to_table("query", [], 5000)
         assert mock_error.has_calls(
             call(f"Exception on writing entries:  {AttributeError('Database not connected')}"),
         )
+
+
+@patch("logging.error")
+def test_given_no_db_connection_when_writing_to_table_then_check_error_message_logged(mock_error):
+    with pytest.raises(DatabaseError):
+        test_db = Database(test_config)
+        test_db.write_entries_to_table("query", [], 5000)
+
+    assert mock_error.has_calls(
+        call(f"Exception on writing entries:  {DatabaseError('Not connected to database!')}"),
+    )

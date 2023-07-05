@@ -3,6 +3,7 @@ from typing import Any, Dict, Mapping, Optional, Sequence, cast
 
 import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
+from mysql.connector.errors import DatabaseError
 
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
@@ -67,15 +68,20 @@ class Database:
             results {Sequence[Any]}: list of queried results
         """
         results = cast(Sequence, [])
-        if self.connection:
-            logger.info(f"Executing query: {query}")
-            try:
-                with self.connection.cursor() as cursor:
-                    cursor.execute(query, params)
-                    results = cursor.fetchall()
-                    self.connection.commit()
-            except Exception as e:
-                logger.error(f"Exception on executing query: {e}")
+
+        if not self.connection:
+            err = DatabaseError("Not connected to database!")
+            logger.error(f"Exception on executing query: {err}")
+            raise err
+
+        logger.info(f"Executing query: {query}")
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params)
+                results = cursor.fetchall()
+                self.connection.commit()
+        except Exception as e:
+            logger.error(f"Exception on executing query: {e}")
 
         return results
 
@@ -95,15 +101,19 @@ class Database:
         num_entries = len(entries)
         index = 0
 
-        if self.connection:
-            try:
-                self.connection.start_transaction()
-                with self.connection.cursor() as cursor:
-                    while index < num_entries:
-                        entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
-                        cursor.executemany(query, entries_batch)
-                        index += rows_per_query
+        if not self.connection:
+            err = DatabaseError("Not connected to database!")
+            logger.error(f"Exception on writing entries: {err}")
+            raise err
 
-                self.connection.commit()
-            except Exception as e:
-                logger.error(f"Exception on writing entries: {e}")
+        try:
+            self.connection.start_transaction()
+            with self.connection.cursor() as cursor:
+                while index < num_entries:
+                    entries_batch = list_of_entries_values(entries[index : index + rows_per_query])  # noqa: E203
+                    cursor.executemany(query, entries_batch)
+                    index += rows_per_query
+
+            self.connection.commit()
+        except Exception as e:
+            logger.error(f"Exception on writing entries: {e}")
