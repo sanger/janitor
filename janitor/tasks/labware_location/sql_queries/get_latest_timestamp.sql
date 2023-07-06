@@ -1,1 +1,1 @@
-SELECT MAX(updated_at) FROM labware_location;
+SELECT MAX(stored_at) FROM labware_location;
