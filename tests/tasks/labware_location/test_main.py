@@ -7,7 +7,7 @@ from mysql.connector.errors import DatabaseError
 from janitor.db.database import Database
 from janitor.helpers.mysql_helpers import parse_entry
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
-from tests.data.entries import TestEntries
+from tests.data.entries import Entries
 from tests.types import (
     AuditsTableEntry,
     CoordinatesTableEntry,
@@ -32,7 +32,7 @@ labware_location_columns = [
     "updated_at",
 ]
 
-test_entries = TestEntries()
+test_entries = Entries()
 
 
 def write_to_tables(

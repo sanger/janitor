@@ -24,7 +24,7 @@ def get_time(delta_mins: int) -> datetime:
     return (datetime.utcnow() - timedelta(minutes=delta_mins)).replace(microsecond=0)
 
 
-class TestEntries:
+class Entries:
     @property
     def good_input_entry_with_location_input(self) -> Dict[str, Any]:
         return {
