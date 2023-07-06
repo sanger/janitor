@@ -5,7 +5,6 @@ from .logging import LOGGING
 
 # setting here will overwrite those in 'defaults.py'
 SYNC_JOB_INTERVAL_SEC = 300
-SYNC_JOB_OVERLAP_SEC = 10
 
 LABWHERE_DB = DbConnectionDetails(
     db_name="janitor_tests_lw_input",
