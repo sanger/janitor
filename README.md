@@ -1,4 +1,5 @@
 <!-- omit from toc -->
+[![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=ffd343)](https://docs.python.org/3.10/)
 # Janitor
 A Python application which hosts task scripts for data management and clean up tasks, running them on a schedule.
 The application uses [APScheduler](https://apscheduler.readthedocs.io/en/3.x/) to schedule and run these tasks.
