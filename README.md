@@ -1,5 +1,5 @@
-<!-- omit from toc -->
 [![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=ffd343)](https://docs.python.org/3.10/)
+<!-- omit from toc -->
 # Janitor
 A Python application which hosts task scripts for data management and clean up tasks, running them on a schedule.
 The application uses [APScheduler](https://apscheduler.readthedocs.io/en/3.x/) to schedule and run these tasks.
@@ -84,9 +84,15 @@ Flake8 is used for linting:
 
     flake8
 
-All three tools can be run by executing:
+isort is used for tidying up imports:
+
+    isort .
+
+All four tools can be run by executing:
 
     ./forlint.sh
+
+**Note:** VSCode settings have been included in the repository and are consistent with the configurations in `pyproject.toml` and `setup.cfg` so that the code is formatted on save.
 
 ## Deployment
 

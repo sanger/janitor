@@ -10,7 +10,12 @@ black .
 echo "Black complete."
 echo "---------------"
 
-echo "Running 'mypy .' on all the files using the config in setup.cfg ..."
+echo "Running 'isort .' on all files using the config in pyproject.toml ..."
+isort .
+echo "isort complete."
+echo "---------------"
+
+echo "Running 'mypy .' on all the files using the config in mypy.ini ..."
 mypy .
 echo "mypy complete."
 echo "---------------"
