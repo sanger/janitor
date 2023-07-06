@@ -41,6 +41,8 @@ Install the required dependencies:
 The app uses a `.env` file for configuration settings.
 The `.env.example` file can be copied and renamed to `.env` to load in those environment variables.
 
+    cp .env.example .env
+
 ## Running the Application
 
 Enter the virtual environment with
