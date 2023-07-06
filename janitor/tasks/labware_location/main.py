@@ -25,8 +25,7 @@ def sync_changes_from_labwhere(config):
         logger.error(f"Exception on querying labware_location: {e}")
         raise
 
-    if not latest_timestamp:
-        latest_timestamp = datetime.min
+    latest_timestamp = latest_timestamp or datetime.min
 
     results = db_labwhere.execute_query(
         GET_LOCATIONS_QUERY,
