@@ -31,4 +31,4 @@ WHERE
 	audits_b.updated_at IS NULL
 	AND audits.updated_at >= %(latest_timestamp)s;
 ORDER BY
-	stored_at ASC
+	stored_at ASC;
