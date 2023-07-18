@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    def __init__(self, creds: DbConnectionDetails, autocommit=True):
+    def __init__(self, creds: DbConnectionDetails, autocommit: bool = True):
         """Open a MySQL connection to read and write data to tables in a database.
 
         Arguments:
