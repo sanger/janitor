@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    def __init__(self, creds: DbConnectionDetails):
+    def __init__(self, creds: DbConnectionDetails, autocommit=True):
         """Open a MySQL connection to read and write data to tables in a database.
 
         Arguments:
             creds {DbConnectionDetails}: details for database connection
         """
         self.creds = creds
+        self.autocommit = autocommit
         self._connection: Optional[MySQLConnectionAbstract] = None
 
     @property
@@ -36,6 +37,7 @@ class Database:
                 database=self.creds["db_name"],
                 username=self.creds["username"],
                 password=self.creds["password"],
+                autocommit=self.autocommit,
             )
 
             if connection.is_connected():
@@ -79,7 +81,6 @@ class Database:
             with self.connection.cursor() as cursor:
                 cursor.execute(query, params)
                 results = cursor.fetchall()
-                self.connection.commit()
         except Exception as e:
             logger.error(f"Exception on executing query: {e}")
 
