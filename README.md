@@ -1,4 +1,5 @@
 [![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=ffd343)](https://docs.python.org/3.10/)
+[![codecov](https://codecov.io/gh/sanger/janitor/branch/main/graph/badge.svg?token=326K6QWD3V)](https://codecov.io/gh/sanger/janitor)
 <!-- omit from toc -->
 # Janitor
 A Python application which hosts task scripts for data management and clean up tasks, running them on a schedule.
@@ -16,6 +17,8 @@ The application uses [APScheduler](https://apscheduler.readthedocs.io/en/3.x/) t
 - [Testing](#testing)
 - [Formatting, Type Checking and Linting](#formatting-type-checking-and-linting)
 - [Deployment](#deployment)
+- [Tasks](#tasks)
+  - [Labware Location](#labware-location)
 - [Updating the Table of Contents](#updating-the-table-of-contents)
 
 
@@ -102,6 +105,17 @@ Merging a pull request into *develop* or *main* creates a release with an associ
 
 The [deployment](https://github.com/sanger/deployment) repository is used to deploy the application.
 The instructions for doing so can be found in `deploy_janitor.yml`.
+
+## Tasks
+
+### Labware Location
+
+This task retrieves data from various tables in the LabWhere database and compiles it into a single table `labware_location` in the MLWH database.
+This table stores the latest known locations of labwares which is a more convenient way of tracking labwares.
+The task checks for changes every 5 minutes and will update all entries which have been changed since the latest entry in the table.
+
+**Note:** The SQL query for retrieving the latest updates from the LabWhere database checks all entries with a timestamp greater than or equal to the latest entry in the `labware_location` table (i.e. the entry with the latest `stored_at` timestamp).
+This means that even if there are no updates since the last time the task ran, it will still update the latest entry in the table and thus the logs will always report 1 entry being updated. (`Updating 1 rows...`)
 
 ## Updating the Table of Contents
 
