@@ -22,4 +22,4 @@ ON DUPLICATE KEY UPDATE
     lims_id = VALUES(lims_id),
     stored_by = VALUES(stored_by),
     stored_at = VALUES(stored_at),
-    updated_at = VALUES(updated_at)
+    updated_at = VALUES(updated_at);

@@ -1,5 +1,6 @@
 import logging.config
 from copy import deepcopy
+from unittest.mock import patch
 
 import pytest
 
@@ -9,6 +10,18 @@ from janitor.types import DbConnectionDetails
 
 CONFIG = get_config("janitor.config.test")
 logging.config.dictConfig(CONFIG.LOGGING)
+
+
+@pytest.fixture
+def mock_info():
+    with patch("logging.info") as mock_logging_info:
+        yield mock_logging_info
+
+
+@pytest.fixture
+def mock_error():
+    with patch("logging.error") as mock_logging_error:
+        yield mock_logging_error
 
 
 @pytest.fixture
