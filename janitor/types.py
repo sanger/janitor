@@ -34,3 +34,11 @@ class LabwareMLWHEntry(TypedDict):
     stored_at: str
     created_at: str
     updated_at: str
+
+
+class RabbitMQDetails(TypedDict):
+    USERNAME: str
+    PASSWORD: str
+    HOST: str
+    PORT: int
+    VHOST: str
