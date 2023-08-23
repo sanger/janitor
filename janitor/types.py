@@ -1,6 +1,7 @@
 from typing import Optional, TypedDict
 
 
+# Databases
 class DbConnectionDetails(TypedDict):
     host: str
     port: int
@@ -9,6 +10,16 @@ class DbConnectionDetails(TypedDict):
     password: str
 
 
+# RabbitMQ
+class RabbitMQDetails(TypedDict):
+    USERNAME: str
+    PASSWORD: str
+    HOST: str
+    PORT: int
+    VHOST: str
+
+
+# labware_location
 class LabwareLabwhereEntry(TypedDict):
     labware_barcode: str
     unordered_barcode: Optional[str]
@@ -36,9 +47,14 @@ class LabwareMLWHEntry(TypedDict):
     updated_at: str
 
 
-class RabbitMQDetails(TypedDict):
-    USERNAME: str
-    PASSWORD: str
-    HOST: str
-    PORT: int
-    VHOST: str
+# sequencing_publisher
+class SampleSequenceMessage(TypedDict):
+    change_date: str
+    id_run: int
+    sequencing_study: str
+    sample_supplier_id: str
+    labware_barcode: str
+    run_status: int
+    irods_root_collection: Optional[str]
+    irods_data_relative_path: Optional[str]
+    irods_secondary_data_relative_path: Optional[str]
