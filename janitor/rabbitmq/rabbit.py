@@ -33,7 +33,7 @@ class Rabbit:
         return self._connection
 
     def publish_message(
-        self, exchange: str, schema_filepath: str, headers: Dict[str, str], message_dicts: Sequence[Dict[str, Any]]
+        self, exchange: str, schema_filepath: str, headers: Dict[str, str], message_dicts: Sequence[Any]
     ) -> None:
         """
         Publish a message to the specified RabbitMQ exchange using a message schema file.
@@ -42,7 +42,7 @@ class Rabbit:
             exchange {str}: exchange to send message to
             schema_filepath {str}: filepath to message schema file
             headers {Dict[str, str]}: message headers
-            message_dicts {Sequence[Dict[str, Any]]}: message to publish
+            message_dicts {Sequence[Any]}: message to publish
         """
         producer = Publisher(connection=self.connection, exchange=exchange, schema_filepath=schema_filepath)
         logger.info(f"Publishing message to exchange: {exchange}")
