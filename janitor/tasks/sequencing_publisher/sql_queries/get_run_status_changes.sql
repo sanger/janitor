@@ -4,20 +4,18 @@ SELECT
     study.name AS sequencing_study,
     sample.supplier_name AS sample_supplier_id,
     labware_subject.friendly_name AS labware_barcode,
-    run_status.id_run_status AS run_status_id,
+    run_status.id_run_status_dict AS run_status_id,
     irods.irods_root_collection AS irods_root_collection,
-    -- note there can be multiple irods files per sequencing run per sample - we'll group these together to avoid multiple rows per irods file
+  -- note there can be multiple irods files per sequencing run per sample - we'll group these together to avoid multiple rows per irods file
     GROUP_CONCAT(irods.irods_data_relative_path ORDER BY irods.irods_data_relative_path SEPARATOR ';' ) AS irods_data_relative_paths,
     GROUP_CONCAT(irods.irods_secondary_data_relative_path ORDER BY irods.irods_secondary_data_relative_path SEPARATOR ';')  AS irods_secondary_data_relative_paths
-
-FROM iseq_flowcell AS flowcell
-
+FROM mlwarehouse.iseq_flowcell AS flowcell
 -- join to sequencing tables, sequencing study and sample table
 JOIN (
-    iseq_product_metrics AS product_metrics,
-    sample,
-    study,
-    iseq_run_status AS run_status
+    mlwarehouse.iseq_product_metrics AS product_metrics,
+    mlwarehouse.sample,
+    mlwarehouse.study,
+    mlwarehouse.iseq_run_status AS run_status
 )
 
 ON (
@@ -63,13 +61,15 @@ JOIN mlwh_events.subjects labware_subject ON (labware_role.subject_id=labware_su
 WHERE
     e.occured_at > %(latest_timestamp)s -- prevent querying data too old to be relevant
     AND labware_role_rt.key='labware' -- limit joins to event subject data to labware
-    AND study.id_study_lims = '7454'  -- study id for SGE Mave samples
+
 GROUP BY
-    sample.supplier_name,run_status.id_run,
+    sample.supplier_name,
+    run_status.id_run,
     change_date,
     labware_barcode,
     run_status_id,
     irods.irods_root_collection
+
 ORDER BY
     sample.supplier_name,
     run_status.id_run,
