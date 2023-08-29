@@ -25,18 +25,18 @@ MLWH_DB = DbConnectionDetails(
 
 # RabbitMQ
 RABBITMQ_DETAILS = RabbitMQDetails(
-    USERNAME=os.environ["RABBITMQ_USERNAME"],
-    PASSWORD=os.environ["RABBITMQ_PASSWORD"],
-    HOST=os.environ["RABBITMQ_HOST"],
-    PORT=int(os.environ["RABBITMQ_PORT"]),
-    VHOST=os.environ["RABBITMQ_VHOST"],
+    USERNAME=os.environ.get("RABBITMQ_USERNAME", "rabbitmq_test_username"),
+    PASSWORD=os.environ.get("RABBITMQ_PASSWORD", "rabbitmq_test_password"),
+    HOST=os.environ.get("RABBITMQ_HOST", "rabbitmq_test_host"),
+    PORT=int(os.environ.get("RABBITMQ_PORT", 5672)),
+    VHOST=os.environ.get("RABBITMQ_VHOST", "rabbitmq_test_vhost"),
 )
 
 # labware_location
 SYNC_JOB_INTERVAL_SEC = 300
 
 # sequencing_publisher
-SEQUENCING_PUBLISHER_JOB_INTERVAL = 120
+SEQUENCING_PUBLISHER_JOB_INTERVAL = 600
 
 RABBITMQ_SEQUENCING_EXCHANGE = "sanger.psd.sample_status.uat"
 RABBITMQ_SEQUENCING_MESSAGE_SCHEMA = "janitor/tasks/sequencing_publisher/message_schemas/sample_sequence_status.avsc"
