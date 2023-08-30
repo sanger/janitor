@@ -6,7 +6,7 @@ from .logging import LOGGING
 # setting here will overwrite those in 'defaults.py'
 # Databases
 LABWHERE_DB = DbConnectionDetails(
-    db_name="janitor_tests_lw_input",
+    db_name="janitor_tests_lw",
     host="127.0.0.1",
     port=3306,
     username="root",
@@ -14,7 +14,7 @@ LABWHERE_DB = DbConnectionDetails(
 )
 
 MLWH_DB = DbConnectionDetails(
-    db_name="janitor_tests_mlwh_output",
+    db_name="janitor_tests_mlwh",
     host="127.0.0.1",
     port=3306,
     username="root",
