@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence, cast
 
 from pika import BlockingConnection
 
@@ -56,7 +56,7 @@ class Rabbit:
         num_messages = math.ceil(len(message_dicts) / batch_size)
 
         logger.info(f"Publishing messages in batches of size {batch_size}")
-        message_dicts = batch_messages(message_dicts, batch_size)
+        message_dicts = cast(Sequence[Any], batch_messages(message_dicts, batch_size))
 
         for message_batch in message_dicts:
             producer.publish_message(headers=headers, message_dicts=message_batch)
