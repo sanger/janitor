@@ -1,4 +1,5 @@
 import ssl
+from typing import Any, Sequence
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials, SSLOptions
 
@@ -47,3 +48,14 @@ def ssl_rabbit_connection(rabbitmq_details: RabbitMQDetails) -> BlockingConnecti
     )
 
     return BlockingConnection(connection_params)
+
+
+def batch_messages(message_dicts: Sequence[Any], batch_size: int):
+    """
+    Split up messages into batches of specified size.
+
+    Arguments:
+        message_dicts {}
+    """
+    for message_index in range(0, len(message_dicts), batch_size):
+        yield message_dicts[message_index : message_index + batch_size]

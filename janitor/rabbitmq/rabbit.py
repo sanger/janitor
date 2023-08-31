@@ -1,9 +1,10 @@
 import logging
+import math
 from typing import Any, Dict, Optional, Sequence
 
 from pika import BlockingConnection
 
-from janitor.helpers.rabbit_helpers import rabbit_connection
+from janitor.helpers.rabbit_helpers import batch_messages, rabbit_connection
 from janitor.rabbitmq.publisher import Publisher
 from janitor.types import RabbitMQDetails
 
@@ -32,20 +33,32 @@ class Rabbit:
 
         return self._connection
 
-    def publish_message(
-        self, exchange: str, schema_filepath: str, headers: Dict[str, str], message_dicts: Sequence[Any]
+    def batch_publish_messages(
+        self,
+        exchange: str,
+        schema_filepath: str,
+        headers: Dict[str, str],
+        message_dicts: Sequence[Any],
+        batch_size: int = 1,
     ) -> None:
         """
-        Publish a message to the specified RabbitMQ exchange using a message schema file.
+        Publish messages in batches to the specified RabbitMQ exchange using a message schema file.
 
         Arguments:
             exchange {str}: exchange to send message to
             schema_filepath {str}: filepath to message schema file
             headers {Dict[str, str]}: message headers
-            message_dicts {Sequence[Any]}: message to publish
+            message_dicts {Sequence[Any]}: messages to publish
+            batch_size {int}: batch size if publishing messages in batches
         """
         producer = Publisher(connection=self.connection, exchange=exchange, schema_filepath=schema_filepath)
-        logger.info(f"Publishing message to exchange: {exchange}")
-        logger.info(f"Message: {message_dicts}")
-        producer.publish_message(headers=headers, message_dicts=message_dicts)
-        logger.info("Message published!")
+        logger.info(f"Publishing messages to exchange: {exchange}")
+        num_messages = math.ceil(len(message_dicts) / batch_size)
+
+        logger.info(f"Publishing messages in batches of size {batch_size}")
+        message_dicts = batch_messages(message_dicts, batch_size)
+
+        for message_batch in message_dicts:
+            producer.publish_message(headers=headers, message_dicts=message_batch)
+
+        logger.info(f"Published {num_messages} messages!")

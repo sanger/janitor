@@ -37,6 +37,7 @@ SYNC_JOB_INTERVAL_SEC = 300
 
 # sequencing_publisher
 SEQUENCING_PUBLISHER_JOB_INTERVAL = 600
+SEQUENCING_PUBLISHER_MESSAGES_BATCH_SIZE = 100
 
 RABBITMQ_SEQUENCING_EXCHANGE = "sanger.psd.sample_status.uat"
 RABBITMQ_SEQUENCING_MESSAGE_SCHEMA = "janitor/tasks/sequencing_publisher/message_schemas/sample_sequence_status.avsc"

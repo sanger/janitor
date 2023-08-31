@@ -22,7 +22,7 @@ def get_and_publish_sequencing_run_status_changes(config):
 
     try:
         run_status_changes = db_mlwh.execute_query(
-            GET_RUN_STATUS_CHANGES_QUERY, {"latest_timestamp": str(date(2023, 2, 1))}
+            GET_RUN_STATUS_CHANGES_QUERY, {"latest_timestamp": str(date(2023, 8, 21))}
         )
         logger.info("Closing connections to databases...")
         db_mlwh.close()
@@ -35,19 +35,21 @@ def get_and_publish_sequencing_run_status_changes(config):
         logger.info("No new changes from MLWH. Skipping task...")
         return
 
+    logger.info(f"Number of changes to publish: {len(run_status_changes)}")
+
     # Write to RabbitMQ
     sample_message_dicts = make_sample_sequence_message_dicts(run_status_changes)
 
     try:
         logger.info("Attempting to connect to RabbitMQ...")
         rabbit_connection = Rabbit(config.RABBITMQ_DETAILS)
-        for message_dict in sample_message_dicts:
-            rabbit_connection.publish_message(
-                exchange=config.RABBITMQ_SEQUENCING_EXCHANGE,
-                schema_filepath=config.RABBITMQ_SEQUENCING_MESSAGE_SCHEMA,
-                headers={},
-                message_dicts=[message_dict],
-            )
+        rabbit_connection.batch_publish_messages(
+            exchange=config.RABBITMQ_SEQUENCING_EXCHANGE,
+            schema_filepath=config.RABBITMQ_SEQUENCING_MESSAGE_SCHEMA,
+            headers={},
+            message_dicts=sample_message_dicts,
+            batch_size=config.SEQUENCING_PUBLISHER_MESSAGES_BATCH_SIZE,
+        )
     except Exception as err:
         logger.error(f"Exception on publishing to RabbitMQ: {err}")
         logger.error("Task failed!")
