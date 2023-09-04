@@ -40,7 +40,7 @@ class Rabbit:
         headers: Dict[str, str],
         message_dicts: Sequence[Any],
         batch_size: int = 1,
-    ) -> None:
+    ) -> Optional[Sequence[Any]]:
         """
         Publish messages in batches to the specified RabbitMQ exchange using a message schema file.
 
@@ -58,7 +58,11 @@ class Rabbit:
         logger.info(f"Publishing messages in batches of size {batch_size}")
         message_dicts = cast(Sequence[Any], batch_messages(message_dicts, batch_size))
 
-        for message_batch in message_dicts:
-            producer.publish_message(headers=headers, message_dicts=message_batch)
-
-        logger.info(f"Published {num_messages} messages!")
+        try:
+            for message_batch in message_dicts:
+                producer.publish_message(headers=headers, message_dicts=message_batch)
+        except:
+            logger.error("Failed to publish batch.")
+            return message_batch
+        else:
+            logger.info(f"Published {num_messages} messages!")
