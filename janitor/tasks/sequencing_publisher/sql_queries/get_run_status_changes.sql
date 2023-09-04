@@ -8,7 +8,8 @@ SELECT
     irods.irods_root_collection AS irods_root_collection,
   -- note there can be multiple irods files per sequencing run per sample - we'll group these together to avoid multiple rows per irods file
     GROUP_CONCAT(irods.irods_data_relative_path ORDER BY irods.irods_data_relative_path SEPARATOR ';' ) AS irods_data_relative_paths,
-    GROUP_CONCAT(irods.irods_secondary_data_relative_path ORDER BY irods.irods_secondary_data_relative_path SEPARATOR ';')  AS irods_secondary_data_relative_paths
+    GROUP_CONCAT(irods.irods_secondary_data_relative_path ORDER BY irods.irods_secondary_data_relative_path SEPARATOR ';')  AS irods_secondary_data_relative_paths,
+    e.occured_at AS latest_timestamp
 FROM mlwarehouse.iseq_flowcell AS flowcell
 -- join to sequencing tables, sequencing study and sample table
 JOIN (
@@ -43,7 +44,7 @@ LEFT JOIN (
     JOIN mlwh_events.subjects sample_subject ON (sample_role.subject_id=sample_subject.id)
 
     WHERE
-        e2.occured_at > %(latest_timestamp)s -- prevent querying data too old to be relevant
+        e2.occured_at >= %(latest_timestamp)s -- prevent querying data too old to be relevant
         AND et2.key='sample_manifest.updated'
         AND sample_role_rt.key='sample'
     GROUP BY sample_subject.uuid
@@ -59,7 +60,7 @@ JOIN mlwh_events.role_types labware_role_rt ON (labware_role.role_type_id=labwar
 JOIN mlwh_events.subjects labware_subject ON (labware_role.subject_id=labware_subject.id)
 
 WHERE
-    e.occured_at > %(latest_timestamp)s -- prevent querying data too old to be relevant
+    e.occured_at >= %(latest_timestamp)s -- prevent querying data too old to be relevant
     AND labware_role_rt.key='labware' -- limit joins to event subject data to labware
 
 GROUP BY
@@ -71,6 +72,7 @@ GROUP BY
     irods.irods_root_collection
 
 ORDER BY
+    latest_timestamp,
     sample.supplier_name,
     run_status.id_run,
     run_status.date;

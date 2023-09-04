@@ -99,6 +99,7 @@ run_status_columns = [
     "irods_root_collection",
     "irods_data_relative_path",
     "irods_secondary_data_relative_path",
+    "latest_timestamp",
 ]
 
 
