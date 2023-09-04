@@ -61,8 +61,10 @@ class Rabbit:
         try:
             for message_batch in message_dicts:
                 producer.publish_message(headers=headers, message_dicts=message_batch)
-        except:
+        except Exception as e:
+            logger.error(f"Exception on querying database: {e}")
             logger.error("Failed to publish batch.")
-            return message_batch
+            return cast(Sequence[Any], message_batch)
         else:
             logger.info(f"Published {num_messages} messages!")
+            return None

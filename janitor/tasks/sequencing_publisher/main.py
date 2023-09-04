@@ -25,7 +25,9 @@ def get_and_publish_sequencing_run_status_changes(config):
     save_job_timestamp(config.SEQUENCING_PUBLISHER_JOB_NAME, datetime.now())
 
     try:
-        run_status_changes = db_mlwh.execute_query(GET_RUN_STATUS_CHANGES_QUERY, {"latest_timestamp": latest_timestamp})
+        run_status_changes = db_mlwh.execute_query(
+            GET_RUN_STATUS_CHANGES_QUERY, {"latest_timestamp": str(latest_timestamp)}
+        )
         logger.info("Closing connections to databases...")
         db_mlwh.close()
     except Exception as e:
