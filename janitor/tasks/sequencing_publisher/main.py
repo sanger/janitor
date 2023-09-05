@@ -45,7 +45,6 @@ def get_and_publish_sequencing_run_status_changes(config):
     sample_message_dicts = make_sample_sequence_message_dicts(run_status_changes)
 
     try:
-        logger.info("Attempting to connect to RabbitMQ...")
         rabbit_connection = Rabbit(config.RABBITMQ_DETAILS)
         last_batch = rabbit_connection.batch_publish_messages(
             exchange=config.RABBITMQ_SEQUENCING_EXCHANGE,
@@ -56,11 +55,12 @@ def get_and_publish_sequencing_run_status_changes(config):
         )
         if last_batch:
             save_job_timestamp(config.SEQUENCING_PUBLISHER_JOB_NAME, last_batch[0]["latest_timestamp"])
-    except Exception as err:
-        logger.error(f"Exception on publishing to RabbitMQ: {err}")
+            raise Exception
+    except Exception:
         logger.error("Task failed!")
         raise
     else:
+        rabbit_connection.close()
         logger.info("Task successful!")
 
     logger.info(f"Task complete in {round(time.time() - start, 2)}s")
