@@ -1,8 +1,9 @@
 import json
 from io import StringIO
-from typing import Any, Dict, Sequence, cast
+from typing import Any, Dict, Optional, Sequence, cast
 
 from fastavro import json_writer, parse_schema
+from fastavro.types import Schema
 from pika import BasicProperties, BlockingConnection
 
 
@@ -22,9 +23,10 @@ class Publisher:
         self._connection = connection
         self._exchange = exchange
         self._schema_filepath = schema_filepath
+        self._schema: Optional[Schema] = None
 
     @property
-    def schema(self):
+    def schema(self) -> Optional[Schema]:
         """
         Return RabbitMQ connection.
         """
@@ -45,7 +47,9 @@ class Publisher:
             {bytes}: Serialised message ready to be published
         """
         string_writer = StringIO()
-        json_writer(string_writer, self.schema, message)
+
+        if self.schema:
+            json_writer(string_writer, self.schema, message)
 
         return cast(bytes, string_writer.getvalue())
 
