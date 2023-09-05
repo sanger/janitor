@@ -21,9 +21,18 @@ class Publisher:
         """
         self._connection = connection
         self._exchange = exchange
+        self._schema_filepath = schema_filepath
 
-        with open(schema_filepath) as schema_file:
-            self._schema = parse_schema(json.load(schema_file))
+    @property
+    def schema(self):
+        """
+        Return RabbitMQ connection.
+        """
+        if self._schema is None:
+            with open(self._schema_filepath) as schema_file:
+                self._schema = parse_schema(json.load(schema_file))
+
+        return self._schema
 
     def serialise_message(self, message: Sequence[Dict[str, Any]]) -> bytes:
         """
@@ -36,7 +45,7 @@ class Publisher:
             {bytes}: Serialised message ready to be published
         """
         string_writer = StringIO()
-        json_writer(string_writer, self._schema, message)
+        json_writer(string_writer, self.schema, message)
 
         return cast(bytes, string_writer.getvalue())
 
