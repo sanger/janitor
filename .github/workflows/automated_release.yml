@@ -11,7 +11,7 @@ env:
 
 jobs:
   build_test_release_push:
-    permissions: 
+    permissions:
       contents: write
       packages: write
     runs-on: ubuntu-latest
@@ -35,8 +35,8 @@ jobs:
 
       - name: Set up MySQL databases
         run: |
-          mysql -e 'CREATE DATABASE janitor_tests_lw_input;' -uroot -h '127.0.0.1'
-          mysql -e 'CREATE DATABASE janitor_tests_mlwh_output;' -uroot -h '127.0.0.1'
+          mysql -e 'CREATE DATABASE janitor_tests_lw;' -uroot -h '127.0.0.1'
+          mysql -e 'CREATE DATABASE janitor_tests_mlwh;' -uroot -h '127.0.0.1'
 
       - name: Run tests against the image
         run: >-
