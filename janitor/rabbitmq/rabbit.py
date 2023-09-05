@@ -24,14 +24,33 @@ class Rabbit:
         self._connection: Optional[BlockingConnection] = None
 
     @property
-    def connection(self) -> BlockingConnection:
+    def connection(self) -> Optional[BlockingConnection]:
         """
         Return RabbitMQ connection.
         """
-        if self._connection is None:
-            return rabbit_connection(self._server_details)
+        if self._connection is not None:
+            return self._connection
+
+        logger.info(f"Attempting to connect to {self._server_details['HOST']}...")
+        logger.info(f"VHost: {self._server_details['VHOST']} Port: {self._server_details['PORT']}")
+
+        try:
+            self._connection = rabbit_connection(self._server_details)
+        except Exception as e:
+            logger.error(f"Exception on connecting to RabbitMQ: {e}")
+            self._connection = None
+            raise
 
         return self._connection
+
+    def close(self) -> None:
+        """
+        Close connection to RabbitMQ.
+        """
+        if self._connection is not None:
+            logger.info("Closing connection to RabbitMQ...")
+            self._connection.close()
+            self._connection = None
 
     def batch_publish_messages(
         self,
@@ -51,6 +70,14 @@ class Rabbit:
             message_dicts {Sequence[Any]}: messages to publish
             batch_size {int}: batch size if publishing messages in batches
         """
+        if not self.connection:
+            logger.error("Not connected to RabbitMQ!")
+            return None
+
+        if len(message_dicts) == 0:
+            logger.error("No messages to publish to RabbitMQ!")
+            return None
+
         producer = Publisher(connection=self.connection, exchange=exchange, schema_filepath=schema_filepath)
         logger.info(f"Publishing messages to exchange: {exchange}")
         num_messages = math.ceil(len(message_dicts) / batch_size)
@@ -62,7 +89,7 @@ class Rabbit:
             for message_batch in message_dicts:
                 producer.publish_message(headers=headers, message_dicts=message_batch)
         except Exception as e:
-            logger.error(f"Exception on querying database: {e}")
+            logger.error(f"Exception on publishing to RabbitMQ: {e}")
             logger.error("Failed to publish batch.")
             return cast(Sequence[Any], message_batch)
         else:
