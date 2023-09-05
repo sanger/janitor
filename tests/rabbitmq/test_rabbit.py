@@ -41,8 +41,10 @@ def test_given_invalid_connection_when_connecting_to_rabbit_then_check_error_mes
 
 
 def test_given_valid_connection_when_closing_connection_then_check_correct_messages_logged(mock_info):
-    with patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock):
+    with patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock) as mock_connection:
         test_rabbit = Rabbit(test_config)
+        test_rabbit._connection = mock_connection
+
         test_rabbit.close()
 
         assert mock_info.has_calls(
@@ -51,7 +53,9 @@ def test_given_valid_connection_when_closing_connection_then_check_correct_messa
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock, return_value={"connection": None})
-def test_given_invalid_connection_when_publishing_to_rabbit_then_check_error_messages_logged(mock_error):
+def test_given_invalid_connection_when_publishing_to_rabbit_then_check_error_messages_logged(
+    mock_connection, mock_error
+):
     with patch("janitor.rabbitmq.publisher.Publisher.publish_message") as mock_publish:
         test_rabbit = Rabbit(test_config)
         test_rabbit.batch_publish_messages(
@@ -66,7 +70,7 @@ def test_given_invalid_connection_when_publishing_to_rabbit_then_check_error_mes
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock)
-def test_given_no_messages_when_publishing_to_rabbit_then_check_error_messages_logged(mock_error):
+def test_given_no_messages_when_publishing_to_rabbit_then_check_error_messages_logged(mock_connection, mock_error):
     with patch("janitor.rabbitmq.publisher.Publisher.publish_message") as mock_publish:
         test_rabbit = Rabbit(test_config)
         test_rabbit.batch_publish_messages(
@@ -81,7 +85,7 @@ def test_given_no_messages_when_publishing_to_rabbit_then_check_error_messages_l
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock)
-def test_given_publisher_error_when_publishing_to_rabbit_then_check_error_messages_logged(mock_error):
+def test_given_publisher_error_when_publishing_to_rabbit_then_check_error_messages_logged(mock_connection, mock_error):
     with patch("janitor.rabbitmq.publisher.Publisher.publish_message", side_effect=Exception):
         test_rabbit = Rabbit(test_config)
         test_rabbit.batch_publish_messages(
@@ -99,7 +103,9 @@ def test_given_publisher_error_when_publishing_to_rabbit_then_check_error_messag
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock)
-def test_given_group_of_messages_when_publishing_to_rabbit_then_check_messages_published_correctly(mock_info):
+def test_given_group_of_messages_when_publishing_to_rabbit_then_check_messages_published_correctly(
+    mock_connection, mock_info
+):
     with patch("janitor.rabbitmq.publisher.Publisher.publish_message") as mock_publish:
         test_rabbit = Rabbit(test_config)
         test_rabbit.batch_publish_messages(
