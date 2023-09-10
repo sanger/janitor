@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, TypedDict
 
 
@@ -49,12 +50,13 @@ class LabwareMLWHEntry(TypedDict):
 
 # sequencing_publisher
 class SampleSequenceMessage(TypedDict):
-    change_date: str
+    change_date: datetime
     id_run: int
     sequencing_study: str
     sample_supplier_id: str
     labware_barcode: str
     run_status: int
-    irods_root_collection: Optional[str]
+    irods_root_collection: str
     irods_data_relative_path: Optional[str]
     irods_secondary_data_relative_path: Optional[str]
+    latest_timestamp: datetime
