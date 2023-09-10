@@ -23,6 +23,14 @@ MLWH_DB = DbConnectionDetails(
     password="",
 )
 
+MLWH_EVENTS_DB = DbConnectionDetails(
+    db_name="mlwh_events",
+    host=LOCALHOST,
+    port=3000,
+    username="root",
+    password="",
+)
+
 # RabbitMQ
 RABBITMQ_DETAILS = RabbitMQDetails(
     USERNAME=os.environ.get("RABBITMQ_USERNAME", "rabbitmq_test_username"),

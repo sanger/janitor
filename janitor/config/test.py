@@ -21,6 +21,14 @@ MLWH_DB = DbConnectionDetails(
     password="",
 )
 
+MLWH_EVENTS_DB = DbConnectionDetails(
+    db_name="janitor_tests_mlwh_events",
+    host="127.0.0.1",
+    port=3306,
+    username="root",
+    password="",
+)
+
 # RabbitMQ
 RABBITMQ_DETAILS = RabbitMQDetails(
     USERNAME="rabbitmq_test_username",
