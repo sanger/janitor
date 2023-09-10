@@ -1,11 +1,12 @@
 import logging.config
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 import pytest
 
 from janitor.db.database import Database
 from janitor.helpers.config_helpers import get_config
+from janitor.rabbitmq.rabbit import Rabbit
 from janitor.types import DbConnectionDetails
 
 CONFIG = get_config("janitor.config.test")
@@ -74,7 +75,6 @@ def mlwh_events_database(mlwh_events_creds):
 
     try:
         mysql_conn = Database(mlwh_events_creds)
-        clear_mlwh_events_tables(mysql_conn)
         yield mysql_conn
     finally:
         mysql_conn.close()
@@ -114,6 +114,14 @@ def lw_creds(config):
         password=config.LABWHERE_DB["password"],
         port=config.LABWHERE_DB["port"],
     )
+
+
+@pytest.fixture
+def mock_rabbit(config):
+    with patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock) as mock_connection:
+        mock_rabbit = Rabbit(config)
+        mock_rabbit._connection = mock_connection
+        yield mock_rabbit
 
 
 def drop_and_recreate_table(db, table_name, cols, extra_query=None):
