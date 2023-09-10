@@ -61,6 +61,31 @@ def mlwh_creds(config):
 
 
 @pytest.fixture
+def mlwh_events_database(mlwh_events_creds):
+    try:
+        # Create the database if it doesn't exist
+        creds_without_database = deepcopy(mlwh_events_creds)
+        creds_without_database["db_name"] = ""
+
+        new_sql_conn = Database(creds_without_database)
+        new_sql_conn.execute_query(f"CREATE DATABASE IF NOT EXISTS {mlwh_events_creds['db_name']}", {})
+    finally:
+        new_sql_conn.close()
+
+    try:
+        mysql_conn = Database(mlwh_events_creds)
+        clear_mlwh_events_tables(mysql_conn)
+        yield mysql_conn
+    finally:
+        mysql_conn.close()
+
+
+@pytest.fixture
+def mlwh_events_creds(config):
+    return config.MLWH_EVENTS_DB
+
+
+@pytest.fixture
 def lw_database(lw_creds):
     try:
         # Create the database if it doesn't exist
@@ -91,57 +116,51 @@ def lw_creds(config):
     )
 
 
+def drop_and_recreate_table(db, table_name, cols, extra_query=None):
+    drop_table_query = f"DROP TABLE IF EXISTS {table_name}"
+    db.execute_query(drop_table_query, {})
+
+    create_table_query = f"CREATE TABLE {table_name} ({cols});"
+    db.execute_query(create_table_query, {})
+
+    if extra_query:
+        db.execute_query(extra_query, {})
+
+
 def clear_lw_tables(lw_database):
     # Labwares table
-    drop_table_query = "DROP TABLE IF EXISTS labwares;"
-    lw_database.execute_query(drop_table_query, {})
-
+    labwares_table_name = "labwares"
     labwares_cols = "id int(11) primary key, barcode varchar(255), location_id int(11), coordinate_id int(11)"
-    create_table_query = f"CREATE TABLE labwares ({labwares_cols});"
-    lw_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=lw_database, table_name=labwares_table_name, cols=labwares_cols)
 
     # Audits table
-    drop_table_query = "DROP TABLE IF EXISTS audits;"
-    lw_database.execute_query(drop_table_query, {})
-
+    audits_table_name = "audits"
     audits_cols = """
     id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)
     """
-    create_table_query = f"CREATE TABLE audits ({audits_cols});"
-    lw_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=lw_database, table_name=audits_table_name, cols=audits_cols)
 
     # Users table
-    drop_table_query = "DROP TABLE IF EXISTS users;"
-    lw_database.execute_query(drop_table_query, {})
-
+    users_table_name = "users"
     users_cols = "id int(11) primary key, login varchar(255)"
-    create_table_query = f"CREATE TABLE users ({users_cols});"
-    lw_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=lw_database, table_name=users_table_name, cols=users_cols)
 
     # Locations table
-    drop_table_query = "DROP TABLE IF EXISTS locations;"
-    lw_database.execute_query(drop_table_query, {})
-
+    locations_table_name = "locations"
     locations_cols = "id int(11) primary key, barcode varchar(255), parentage varchar(255)"
-    create_table_query = f"CREATE TABLE locations ({locations_cols});"
-    lw_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=lw_database, table_name=locations_table_name, cols=locations_cols)
 
     # Coordinates table
-    drop_table_query = "DROP TABLE IF EXISTS coordinates;"
-    lw_database.execute_query(drop_table_query, {})
-
+    coordinates_table_name = "coordinates"
     coordinates_cols = (
         "id int(11) primary key, `position` int(11), `row` int(11), `column` int(11), location_id int(11)"
     )
-    create_table_query = f"CREATE TABLE coordinates ({coordinates_cols});"
-    lw_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=lw_database, table_name=coordinates_table_name, cols=coordinates_cols)
 
 
 def clear_mlwh_tables(mlwh_database):
     # Labware location table
-    drop_table_query = "DROP TABLE IF EXISTS labware_location;"
-    mlwh_database.execute_query(drop_table_query, {})
-
+    labware_location_table_name = "labware_location"
     labware_location_cols = """
         id int(11) primary key NOT NULL AUTO_INCREMENT,
         labware_barcode varchar(255) NOT NULL UNIQUE,
@@ -156,5 +175,4 @@ def clear_mlwh_tables(mlwh_database):
         created_at datetime(6) NOT NULL,
         updated_at datetime(6) NOT NULL
     """
-    create_table_query = f"CREATE TABLE labware_location ({labware_location_cols});"
-    mlwh_database.execute_query(create_table_query, {})
+    drop_and_recreate_table(db=mlwh_database, table_name=labware_location_table_name, cols=labware_location_cols)
