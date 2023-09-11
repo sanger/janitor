@@ -37,7 +37,7 @@ def test_given_error_when_querying_database_then_check_task_fails(mock_error, co
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.batch_publish_messages", return_value=None)
-def test_given_one_entry_returned_when_querying_database_then_check_task_fails(
+def test_given_one_entry_returned_when_querying_database_then_check_correct_message_published(
     mock_publish, mock_info, mock_rabbit, config
 ):
     test_message_dicts = make_sample_sequence_message_dicts(
