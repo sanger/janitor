@@ -6,8 +6,8 @@ from typing import Any, Sequence
 from janitor.db.database import Database
 from janitor.helpers.log_helpers import load_job_timestamp, save_job_timestamp
 from janitor.helpers.mlwh_helpers import make_sample_sequence_message_dicts
+from janitor.helpers.mysql_helpers import load_query
 from janitor.rabbitmq.rabbit import Rabbit
-from janitor.tasks.sequencing_publisher.sql_queries.sql_queries import GET_RUN_STATUS_CHANGES_QUERY
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,8 @@ def get_and_publish_sequencing_run_status_changes(config):
 
     # Get sample sequence run changes
     db_mlwh = Database(config.MLWH_DB)
+
+    GET_RUN_STATUS_CHANGES_QUERY = load_query(config.SEQUENCING_PUBLISHER_RUN_STATUS_QUERY)
 
     run_status_changes: Sequence[Any] = []
 
