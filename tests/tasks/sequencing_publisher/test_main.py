@@ -195,9 +195,10 @@ def write_to_mlwh_events_database(
         )
 
 
+@patch("janitor.rabbitmq.rabbit.Rabbit.batch_publish_messages", return_value=None)
 @patch("janitor.helpers.mlwh_helpers.make_sample_sequence_message_dicts")
 def test_given_test_data_in_databases_when_querying_database_then_check_correct_rows_returned(
-    mock_make_messages, mock_info, mock_error, config, mlwh_database, mlwh_events_database
+    mock_publish, mock_make_messages, mock_info, mock_error, config, mlwh_database, mlwh_events_database, mock_rabbit
 ):
     write_to_mlwh_database(
         mlwh_database=mlwh_database,
