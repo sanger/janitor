@@ -118,6 +118,7 @@ jobs:
         run: |
           mysql -e 'CREATE DATABASE janitor_tests_lw;' -uroot -h '127.0.0.1'
           mysql -e 'CREATE DATABASE janitor_tests_mlwh;' -uroot -h '127.0.0.1'
+          mysql -e 'CREATE DATABASE janitor_tests_mlwh_events;' -uroot -h '127.0.0.1'
       - name: Test with pytest
         run: |
           python -m pytest -vx
