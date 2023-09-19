@@ -198,7 +198,7 @@ def write_to_mlwh_events_database(
 @patch("janitor.rabbitmq.rabbit.Rabbit.batch_publish_messages", return_value=None)
 @patch("janitor.helpers.mlwh_helpers.make_sample_sequence_message_dicts")
 def test_given_test_data_in_databases_when_querying_database_then_check_correct_rows_returned(
-    mock_publish, mock_make_messages, mock_info, mock_error, config, mlwh_database, mlwh_events_database, mock_rabbit
+    mock_publish, mock_make_messages, mock_error, config, mlwh_database, mlwh_events_database, mock_rabbit
 ):
     write_to_mlwh_database(
         mlwh_database=mlwh_database,
@@ -239,11 +239,6 @@ def test_given_test_data_in_databases_when_querying_database_then_check_correct_
         get_and_publish_sequencing_run_status_changes(config)
         assert mock_make_messages.has_calls(call(expected_message_dicts))
 
-    assert mock_info.has_calls(
-        call("Starting sequencing publisher task..."),
-        call("Closing connections to databases..."),
-    )
-
     assert mock_error.call_count == 0
 
 
@@ -255,8 +250,6 @@ def test_given_valid_db_details_when_no_updates_in_database_then_check_exits_ear
         get_and_publish_sequencing_run_status_changes(config)
 
     assert mock_info.has_calls(
-        call("Starting sequencing publisher task..."),
-        call("Closing connections to databases..."),
         call("No new changes from MLWH. Skipping task..."),
     )
 
@@ -276,7 +269,7 @@ def test_given_error_when_querying_database_then_check_task_fails(mock_error, co
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.batch_publish_messages", return_value=None)
 def test_given_one_entry_returned_when_querying_database_then_check_correct_message_published(
-    mock_publish, mock_info, mock_rabbit, config
+    mock_publish, mock_info, mock_error, mock_rabbit, config
 ):
     test_message_dicts = make_sample_sequence_message_dicts(
         [
@@ -324,6 +317,8 @@ def test_given_one_entry_returned_when_querying_database_then_check_correct_mess
             config.SEQUENCING_PUBLISHER_MESSAGES_BATCH_SIZE,
         )
     )
+
+    assert mock_error.call_count == 0
 
 
 @patch("janitor.helpers.log_helpers.save_job_timestamp")
