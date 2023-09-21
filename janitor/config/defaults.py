@@ -1,10 +1,13 @@
 import os
+from pathlib import Path
 
 from janitor.types import DbConnectionDetails, RabbitMQDetails
 
 from .logging import *  # noqa: F401, F403
 
 LOCALHOST = os.environ.get("LOCALHOST", "127.0.0.1")
+
+JANITOR_TMP_FOLDER_PATH = Path("./janitor/tmp")
 
 # Databases
 LABWHERE_DB = DbConnectionDetails(

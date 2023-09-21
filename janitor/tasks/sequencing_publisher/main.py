@@ -23,8 +23,10 @@ def get_and_publish_sequencing_run_status_changes(config):
 
     run_status_changes: Sequence[Any] = []
 
-    latest_timestamp = load_job_timestamp(config.SEQUENCING_PUBLISHER_JOB_NAME) or date(2023, 8, 21)
-    save_job_timestamp(config.SEQUENCING_PUBLISHER_JOB_NAME, datetime.now())
+    latest_timestamp = load_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME) or date(
+        2023, 8, 21
+    )
+    save_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME, datetime.now())
 
     try:
         run_status_changes = db_mlwh.execute_query(
@@ -56,7 +58,9 @@ def get_and_publish_sequencing_run_status_changes(config):
             batch_size=config.SEQUENCING_PUBLISHER_MESSAGES_BATCH_SIZE,
         )
         if last_batch:
-            save_job_timestamp(config.SEQUENCING_PUBLISHER_JOB_NAME, last_batch[0]["latest_timestamp"])
+            save_job_timestamp(
+                config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME, last_batch[0]["latest_timestamp"]
+            )
             raise Exception
     except Exception:
         logger.error("Task failed!")

@@ -1,9 +1,9 @@
-from janitor.types import DbConnectionDetails, RabbitMQDetails
-
 from .defaults import *  # noqa: F401, F403
 from .logging import LOGGING
 
 # setting here will overwrite those in 'defaults.py'
+JANITOR_TMP_FOLDER_PATH = Path("./tests/tmp")
+
 # Databases
 LABWHERE_DB = DbConnectionDetails(
     db_name="janitor_tests_lw",
