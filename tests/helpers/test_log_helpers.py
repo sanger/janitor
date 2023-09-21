@@ -1,8 +1,6 @@
 from datetime import datetime
 from unittest.mock import call, mock_open, patch
 
-import pytest
-
 from janitor.helpers.log_helpers import load_job_timestamp, make_tmp_folder, save_job_timestamp
 
 
@@ -54,7 +52,7 @@ def test_given_timestamp_saved_when_loading_timestamp_then_check_correct_timesta
     test_name = "test_job_name"
     test_timestamp = datetime.now()
 
-    with patch("builtins.open", mock_open(read_data=str(test_timestamp))) as mock_open_file:
+    with patch("builtins.open", mock_open(read_data=str(test_timestamp))):
         actual_timestamp = load_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, test_name)
 
         assert str(actual_timestamp) == str(test_timestamp)
