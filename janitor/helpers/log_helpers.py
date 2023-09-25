@@ -3,8 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-TMP_FOLDER = Path("./janitor/tmp")
-
 
 def make_tmp_folder(tmp_folder_path: Path) -> None:
     """
