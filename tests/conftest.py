@@ -1,5 +1,6 @@
 import logging.config
 from copy import deepcopy
+from pathlib import Path
 from unittest.mock import PropertyMock, patch
 
 import pytest
@@ -13,7 +14,6 @@ from janitor.types import DbConnectionDetails
 CONFIG = get_config("janitor.config.test")
 logging.config.dictConfig(CONFIG.LOGGING)
 
-from pathlib import Path
 
 DB_QUERIES_FOLDERPATH = Path("tests/db_queries")
 
