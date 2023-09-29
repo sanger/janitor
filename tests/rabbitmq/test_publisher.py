@@ -1,4 +1,3 @@
-from io import StringIO
 from unittest.mock import PropertyMock, call, mock_open, patch
 
 from pika import BasicProperties, BlockingConnection
@@ -64,7 +63,7 @@ def test_given_messages_when_publishing_then_check_publisher_called_with_correct
     mock_blocking_connection, mock_rabbit
 ):
     test_publisher = Publisher(mock_rabbit._connection, TEST_EXCHANGE, TEST_SCHEMA_FILE)
-    test_headers = {"header": 1}
+    test_headers = {"header": "header"}
     test_message_dicts = [{"message": 1}, {"message": 2}, {"message": 3}]
     test_routing_key = "routing_key"
 
@@ -78,7 +77,7 @@ def test_given_messages_when_publishing_then_check_publisher_called_with_correct
             call(
                 exchange=TEST_EXCHANGE,
                 routing_key=test_routing_key,
-                properties=BasicProperties(test_headers),
+                properties=BasicProperties(str(test_headers)),
                 body="messages",
             ),
         )

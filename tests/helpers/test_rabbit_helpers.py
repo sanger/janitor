@@ -1,9 +1,8 @@
-from datetime import datetime
-from unittest.mock import call, mock_open, patch
+from unittest.mock import patch
 
-from pika import BlockingConnection, ConnectionParameters, PlainCredentials
+from pika import BlockingConnection
 
-from janitor.helpers.rabbit_helpers import batch_messages, rabbit_connection, ssl_rabbit_connection
+from janitor.helpers.rabbit_helpers import batch_messages, rabbit_connection
 from janitor.types import RabbitMQDetails
 
 
@@ -24,4 +23,4 @@ def test_given_rabbitmq_details_when_creating_connection_then_check_connection_i
     )
     test_rabbit_connection = rabbit_connection(test_rabbitmq_details)
 
-    assert type(test_rabbit_connection) == BlockingConnection
+    assert isinstance(test_rabbit_connection, BlockingConnection)
