@@ -19,6 +19,7 @@ The application uses [APScheduler](https://apscheduler.readthedocs.io/en/3.x/) t
 - [Deployment](#deployment)
 - [Tasks](#tasks)
   - [Labware Location](#labware-location)
+  - [Sequencing Publisher](#sequencing-publisher)
 - [Updating the Table of Contents](#updating-the-table-of-contents)
 
 
@@ -116,6 +117,17 @@ The task checks for changes every 5 minutes and will update all entries which ha
 
 **Note:** The SQL query for retrieving the latest updates from the LabWhere database checks all entries with a timestamp greater than or equal to the latest entry in the `labware_location` table (i.e. the entry with the latest `stored_at` timestamp).
 This means that even if there are no updates since the last time the task ran, it will still update the latest entry in the table and thus the logs will always report 1 entry being updated. (`Updating 1 rows...`)
+
+### Sequencing Publisher
+
+This task queries the MLWH and MLWH Events databases for sample sequencing run status changes and publishes these changes to RabbitMQ.
+These messages are published to a fanout exchange using the message schema found in `janitor/tasks/sequencing_publisher/message_schemas/sample_sequence_status.avsc`.
+Users can consume from this queue to retrieve sequencing run status changes without needing to poll the MLWH database.
+
+The messages are sent in groups where each individual message corresponds to a row returned from the SQL query to retrieve sequencing run status changes.
+
+**Note:** If an error occurs when messages are being published to RabbitMQ, the earliest timestamp from the group of messages which failed to publish is saved.
+This timestamp is used to retrieve changes when the job is ran next which means that there may be duplicate messages published to consumers but using the timestamp this way minimises the number of duplicate messages.
 
 ## Updating the Table of Contents
 

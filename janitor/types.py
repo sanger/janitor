@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Optional, TypedDict
 
 
+# Databases
 class DbConnectionDetails(TypedDict):
     host: str
     port: int
@@ -9,6 +11,16 @@ class DbConnectionDetails(TypedDict):
     password: str
 
 
+# RabbitMQ
+class RabbitMQDetails(TypedDict):
+    USERNAME: str
+    PASSWORD: str
+    HOST: str
+    PORT: int
+    VHOST: str
+
+
+# labware_location
 class LabwareLabwhereEntry(TypedDict):
     labware_barcode: str
     unordered_barcode: Optional[str]
@@ -34,3 +46,17 @@ class LabwareMLWHEntry(TypedDict):
     stored_at: str
     created_at: str
     updated_at: str
+
+
+# sequencing_publisher
+class SampleSequenceMessage(TypedDict):
+    change_date: datetime
+    id_run: int
+    sequencing_study: str
+    sample_supplier_id: str
+    labware_barcode: str
+    run_status: int
+    irods_root_collection: str
+    irods_data_relative_path: Optional[str]
+    irods_secondary_data_relative_path: Optional[str]
+    latest_timestamp: datetime
