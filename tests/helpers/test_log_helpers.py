@@ -1,7 +1,30 @@
+import logging
 from datetime import datetime
 from unittest.mock import call, mock_open, patch
 
-from janitor.helpers.log_helpers import load_job_timestamp, make_tmp_folder, save_job_timestamp
+import pytest
+
+from janitor.helpers.log_helpers import custom_log, load_job_timestamp, make_tmp_folder, save_job_timestamp
+
+logger = logging.getLogger(__name__)
+
+TEST_EVENT_NAME = "test_event"
+TEST_MESSAGE = "test_message"
+
+
+def test_given_invalid_event_type_when_logging_message_then_check_ValueError_raised(mock_info):
+    with pytest.raises(ValueError):
+        custom_log(logger, "invalid type", TEST_EVENT_NAME, TEST_MESSAGE)
+
+
+def test_given_info_event_type_when_logging_message_then_check_message_logged_correctly(mock_info):
+    custom_log(logger, "info", TEST_EVENT_NAME, TEST_MESSAGE)
+    assert mock_info.has_calls([call(f"[{TEST_EVENT_NAME}]"), call(TEST_MESSAGE)])
+
+
+def test_given_error_event_type_when_logging_message_then_check_message_logged_correctly(mock_error):
+    custom_log(logger, "error", TEST_EVENT_NAME, TEST_MESSAGE)
+    assert mock_error.has_calls([call(f"[{TEST_EVENT_NAME}]"), call(TEST_MESSAGE)])
 
 
 @patch("os.mkdir")

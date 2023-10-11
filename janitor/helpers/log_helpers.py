@@ -1,7 +1,29 @@
 import os
 from datetime import datetime
+from logging import Logger
 from pathlib import Path
 from typing import Optional
+
+
+def custom_log(logger: Logger, event_type: str, event_name: str, text: str) -> None:
+    """
+    Log a message with specified severity and name.
+
+    Parameters:
+        logger {Logger}: Logger to use
+        event_type {str}: 'info' or 'error'
+        event_name {str}: Name of event (TASK_START, TASK_COMPLETE etc.)
+        text {str}: Text to log
+    """
+    if event_type not in ["info", "error"]:
+        raise ValueError("Invalid event type. Please specify 'info' or 'error'.")
+
+    if event_type == "info":
+        logger.info(f"[{event_name}]")
+        logger.info(text)
+    else:
+        logger.error(f"[{event_name}]")
+        logger.error(text)
 
 
 def make_tmp_folder(tmp_folder_path: Path) -> None:
