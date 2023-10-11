@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Sequence, cast
 
 from pika import BlockingConnection
 
+from janitor.helpers.log_helpers import custom_log
 from janitor.helpers.rabbit_helpers import batch_messages, rabbit_connection
 from janitor.rabbitmq.publisher import Publisher
 from janitor.types import RabbitMQDetails
@@ -31,13 +32,18 @@ class Rabbit:
         if self._connection is not None:
             return self._connection
 
-        logger.info(f"Attempting to connect to {self._server_details['HOST']}...")
-        logger.info(f"VHost: {self._server_details['VHOST']} Port: {self._server_details['PORT']}")
+        custom_log(logger, "info", "RABBIT_CONNECTION", f"Attempting to connect to {self._server_details['HOST']}...")
+        custom_log(
+            logger,
+            "info",
+            "RABBIT_CONNECTION",
+            f"VHost: {self._server_details['VHOST']} Port: {self._server_details['PORT']}",
+        )
 
         try:
             self._connection = rabbit_connection(self._server_details)
         except Exception as e:
-            logger.error(f"Exception on connecting to RabbitMQ: {e}")
+            custom_log(logger, "error", "RABBIT_EXCEPTION", f"Exception on connecting to RabbitMQ: {e}")
             self._connection = None
             raise
 
@@ -48,7 +54,7 @@ class Rabbit:
         Close connection to RabbitMQ.
         """
         if self._connection is not None:
-            logger.info("Closing connection to RabbitMQ...")
+            custom_log(logger, "info", "RABBIT_CONNECTION", "Closing connection to RabbitMQ...")
             self._connection.close()
             self._connection = None
 
@@ -71,27 +77,27 @@ class Rabbit:
             batch_size {int}: batch size if publishing messages in batches
         """
         if not self.connection:
-            logger.error("Not connected to RabbitMQ!")
+            custom_log(logger, "error", "RABBIT_ERROR", "Not connected to RabbitMQ!")
             return None
 
         if len(message_dicts) == 0:
-            logger.error("No messages to publish to RabbitMQ!")
+            custom_log(logger, "error", "RABBIT_ERROR", "No messages to publish to RabbitMQ!")
             return None
 
         producer = Publisher(connection=self.connection, exchange=exchange, schema_filepath=schema_filepath)
-        logger.info(f"Publishing messages to exchange: {exchange}")
+        custom_log(logger, "info", "RABBIT_PUBLISH", f"Publishing messages to exchange: {exchange}")
         num_messages = math.ceil(len(message_dicts) / batch_size)
 
-        logger.info(f"Publishing messages in batches of size {batch_size}")
+        custom_log(logger, "info", "RABBIT_PUBLISH", f"Publishing messages in batches of size {batch_size}")
         message_dicts = cast(Sequence[Any], batch_messages(message_dicts, batch_size))
 
         try:
             for message_batch in message_dicts:
                 producer.publish_message(headers=headers, message_dicts=message_batch)
         except Exception as e:
-            logger.error(f"Exception on publishing to RabbitMQ: {e}")
-            logger.error("Failed to publish batch.")
+            custom_log(logger, "error", "RABBIT_EXCEPTION", f"Exception on publishing to RabbitMQ: {e}")
+            custom_log(logger, "error", "RABBIT_EXCEPTION", "Failed to publish batch.")
             return cast(Sequence[Any], message_batch)
         else:
-            logger.info(f"Published {num_messages} messages!")
+            custom_log(logger, "info", "RABBIT_PUBLISH", f"Published {num_messages} messages!")
             return None

@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Any, Sequence
 
 from janitor.db.database import Database
-from janitor.helpers.log_helpers import load_job_timestamp, save_job_timestamp
+from janitor.helpers.log_helpers import custom_log, load_job_timestamp, save_job_timestamp
 from janitor.helpers.mlwh_helpers import make_sample_sequence_message_dicts
 from janitor.helpers.mysql_helpers import load_query
 from janitor.rabbitmq.rabbit import Rabbit
@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 def get_and_publish_sequencing_run_status_changes(config):
     start = time.time()
-    logger.info("Starting sequencing publisher task...")
+
+    custom_log(logger, "info", "TASK_START", "Starting sequencing publisher task...")
 
     # Get sample sequence run changes
     db_mlwh = Database(config.MLWH_DB)
@@ -32,18 +33,18 @@ def get_and_publish_sequencing_run_status_changes(config):
         run_status_changes = db_mlwh.execute_query(
             GET_RUN_STATUS_CHANGES_QUERY, {"latest_timestamp": str(latest_timestamp)}
         )
-        logger.info("Closing connections to databases...")
+        custom_log(logger, "info", "TASK_PROGRESS", "Closing connections to databases...")
         db_mlwh.close()
     except Exception as e:
-        logger.error(f"Exception on querying database: {e}")
-        logger.error("Task failed!")
+        custom_log(logger, "error", "TASK_EXCEPTION", f"Exception on querying database: {e}")
+        custom_log(logger, "error", "TASK_FAILED", "Task failed!")
         raise
 
     if not run_status_changes:
-        logger.info("No new changes from MLWH. Skipping task...")
+        custom_log(logger, "info", "TASK_COMPLETE", "No new changes from MLWH. Skipping task...")
         return
 
-    logger.info(f"Number of changes to publish: {len(run_status_changes)}")
+    custom_log(logger, "info", "TASK_PROGRESS", f"Number of changes to publish: {len(run_status_changes)}")
 
     # Write to RabbitMQ
     sample_message_dicts = make_sample_sequence_message_dicts(run_status_changes)
@@ -63,10 +64,10 @@ def get_and_publish_sequencing_run_status_changes(config):
             )
             raise Exception
     except Exception:
-        logger.error("Task failed!")
+        custom_log(logger, "error", "TASK_FAILED", "Task failed!")
         raise
     else:
         rabbit_connection.close()
-        logger.info("Task successful!")
+        custom_log(logger, "info", "TASK_SUCCESS", "Task successful!")
 
-    logger.info(f"Task complete in {round(time.time() - start, 2)}s")
+    custom_log(logger, "info", "TASK_COMPLETE", f"Task complete in {round(time.time() - start, 2)}s")
