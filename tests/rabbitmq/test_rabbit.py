@@ -35,9 +35,7 @@ def test_given_test_config_when_creating_rabbit_connection_then_check_connection
 def test_given_invalid_connection_when_connecting_to_rabbit_then_check_error_messages_logged(mock_error):
     with patch("janitor.helpers.rabbit_helpers.rabbit_connection", side_effect=Exception):
         Rabbit(test_config)
-        assert mock_error.has_calls(
-            call(f"Exception on connecting to RabbitMQ: {Exception}"),
-        )
+        assert mock_error.has_calls([call("[RABBIT_EXCEPTION]")])
 
 
 def test_given_valid_connection_when_closing_connection_then_check_correct_messages_logged(mock_info):
@@ -47,9 +45,7 @@ def test_given_valid_connection_when_closing_connection_then_check_correct_messa
 
         test_rabbit.close()
 
-        assert mock_info.has_calls(
-            call("Closing connection to RabbitMQ..."),
-        )
+        assert mock_info.has_calls([call("[RABBIT_CONNECTION]")])
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock, return_value={"connection": None})
@@ -62,9 +58,7 @@ def test_given_invalid_connection_when_publishing_to_rabbit_then_check_error_mes
             exchange=TEST_EXCHANGE, schema_filepath=TEST_SCHEMA_FILEPATH, headers={}, message_dicts=[], batch_size=1
         )
 
-        assert mock_error.has_calls(
-            call("Not connected to RabbitMQ!"),
-        )
+        assert mock_error.has_calls([call("[RABBIT_ERROR]")])
 
         assert mock_publish.call_count == 0
 
@@ -77,9 +71,7 @@ def test_given_no_messages_when_publishing_to_rabbit_then_check_error_messages_l
             exchange=TEST_EXCHANGE, schema_filepath=TEST_SCHEMA_FILEPATH, headers={}, message_dicts=[], batch_size=1
         )
 
-        assert mock_error.has_calls(
-            call("No messages to publish to RabbitMQ!"),
-        )
+        assert mock_error.has_calls([call("[RABBIT_ERROR]")])
 
         assert mock_publish.call_count == 0
 
@@ -96,10 +88,7 @@ def test_given_publisher_error_when_publishing_to_rabbit_then_check_error_messag
             batch_size=TEST_BATCH_SIZE,
         )
 
-        assert mock_error.has_calls(
-            call(f"Exception on publishing to RabbitMQ: {Exception}"),
-            call("Failed to publish batch."),
-        )
+        assert mock_error.has_calls([call("[RABBIT_EXCEPTION]"), call("[RABBIT_EXCEPTION]")])
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock)
@@ -121,8 +110,4 @@ def test_given_group_of_messages_when_publishing_to_rabbit_then_check_messages_p
             call({}, TEST_MESSAGES[2:4]),
         )
 
-        assert mock_info.has_calls(
-            call(f"Publishing messages to exchange: {TEST_EXCHANGE}"),
-            call(f"Publishing messages in batches of size {TEST_BATCH_SIZE}"),
-            call(f"Published {len(TEST_MESSAGES)} messages!"),
-        )
+        assert mock_info.has_calls([call("[RABBIT_PUBLISH]"), call("[RABBIT_PUBLISH]"), call("[RABBIT_PUBLISH]")])

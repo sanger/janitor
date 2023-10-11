@@ -249,9 +249,7 @@ def test_given_valid_db_details_when_no_updates_in_database_then_check_exits_ear
         mock_execute.return_value = []
         get_and_publish_sequencing_run_status_changes(config)
 
-    assert mock_info.has_calls(
-        call("No new changes from MLWH. Skipping task..."),
-    )
+    assert mock_info.has_calls([call("TASK_COMPLETE"), call("No new changes from MLWH. Skipping task...")])
 
     assert mock_error.call_count == 0
 
@@ -261,10 +259,7 @@ def test_given_error_when_querying_database_then_check_task_fails(mock_error, co
     with pytest.raises(DatabaseError):
         get_and_publish_sequencing_run_status_changes(config)
 
-    assert mock_error.has_calls(
-        call(f"Exception on querying database: {DatabaseError()}"),
-        call("Task failed!"),
-    )
+    assert mock_error.has_calls([call("[TASK_EXCEPTION]"), call("[TASK_FAILED]")])
 
 
 @patch("janitor.rabbitmq.rabbit.Rabbit.batch_publish_messages", return_value=None)
@@ -303,10 +298,7 @@ def test_given_one_entry_returned_when_querying_database_then_check_correct_mess
         mock_execute.return_value = [test_query_return]
         get_and_publish_sequencing_run_status_changes(config)
 
-    assert mock_info.has_calls(
-        call("Number of changes to publish: 1"),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("[TASK_PROGRESS]"), call("[TASK_SUCCESS]")])
 
     assert mock_publish.has_calls(
         call(
@@ -365,4 +357,4 @@ def test_given_error_when_publishing_to_rabbit_then_check_task_fails(
             call(config.SEQUENCING_PUBLISHER_JOB_NAME, test_message_dicts[0]["latest_timestamp"])
         )
 
-    assert mock_error.has_calls(call("Task failed!"))
+    assert mock_error.has_calls([call("[TASK_FAILED]")])
