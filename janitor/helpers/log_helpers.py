@@ -14,9 +14,6 @@ def custom_log(logger: Logger, event_type: str, event_name: str, text: str) -> N
         event_type {str}: 'info' or 'error'
         event_name {str}: Name of event (TASK_START, TASK_COMPLETE etc.)
         text {str}: Text to log
-
-    Returns:
-        msg {str}: Logged message
     """
     if event_type not in ["info", "error"]:
         raise ValueError("Invalid event type. Please specify 'info' or 'error'.")
