@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 def get_and_publish_sequencing_run_status_changes(config):
     start = time.time()
+    start_datetime = datetime.now()
 
     custom_log(logger, "info", "TASK_START", "Starting sequencing publisher task...")
 
@@ -27,7 +28,6 @@ def get_and_publish_sequencing_run_status_changes(config):
     latest_timestamp = load_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME) or date(
         2023, 8, 21
     )
-    save_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME, datetime.now())
 
     try:
         run_status_changes = db_mlwh.execute_query(
@@ -63,6 +63,9 @@ def get_and_publish_sequencing_run_status_changes(config):
                 config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME, last_batch[0]["latest_timestamp"]
             )
             raise Exception
+        else:
+            save_job_timestamp(config.JANITOR_TMP_FOLDER_PATH, config.SEQUENCING_PUBLISHER_JOB_NAME, start_datetime)
+
     except Exception:
         custom_log(logger, "error", "TASK_FAILED", "Task failed!")
         raise
