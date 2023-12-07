@@ -27,6 +27,7 @@ class LocationsTableEntry(TypedDict):
     id: int
     barcode: str
     parentage: str
+    name: str
 
 
 class CoordinatesTableEntry(TypedDict):
@@ -42,6 +43,7 @@ class LabwareLocationTableEntry(TypedDict):
     labware_barcode: str
     location_barcode: str
     full_location_address: str
+    location_name: str
     coordinate_position: Optional[int]
     coordinate_row: Optional[int]
     coordinate_column: Optional[int]
