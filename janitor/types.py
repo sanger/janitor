@@ -38,9 +38,9 @@ class LabwareLabwhereEntry(TypedDict):
 
 class LabwareMLWHEntry(TypedDict):
     labware_barcode: str
-    location_barcode: str
-    full_location_address: str
-    location_name: str
+    location_barcode: Optional[str]
+    full_location_address: Optional[str]
+    location_name: Optional[str]
     coordinate_position: Optional[int]
     coordinate_row: Optional[int]
     coordinate_column: Optional[int]
