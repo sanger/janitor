@@ -22,6 +22,7 @@ labware_location_columns = [
     "labware_barcode",
     "location_barcode",
     "full_location_address",
+    "location_name",
     "coordinate_position",
     "coordinate_row",
     "coordinate_column",
@@ -75,7 +76,7 @@ def write_to_tables(
         lw_database.write_entries_to_table(insert_into_table_query, users_entries, len(users_entries))
 
     if locations_entries:
-        insert_into_table_query = "INSERT INTO locations (id, barcode, parentage) VALUES (%s, %s, %s);"
+        insert_into_table_query = "INSERT INTO locations (id, barcode, parentage, name) VALUES (%s, %s, %s, %s);"
         lw_database.write_entries_to_table(insert_into_table_query, locations_entries, len(locations_entries))
 
     if coordinates_entries:
@@ -92,6 +93,7 @@ def write_to_tables(
                     labware_barcode,
                     location_barcode,
                     full_location_address,
+                    location_name,
                     coordinate_position,
                     coordinate_row,
                     coordinate_column,
@@ -100,7 +102,7 @@ def write_to_tables(
                     stored_at,
                     created_at,
                     updated_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         mlwh_database.write_entries_to_table(
             insert_into_table_query, labware_location_entries, len(labware_location_entries)
         )
@@ -162,6 +164,7 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -198,6 +201,7 @@ def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_che
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -233,6 +237,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -269,6 +274,7 @@ def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_th
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -366,6 +372,7 @@ def test_given_mixed_entries_when_writing_entries_then_check_all_entries_process
         assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
         assert actual_result["location_barcode"] == expected_result["location_barcode"]
         assert actual_result["full_location_address"] == expected_result["full_location_address"]
+        assert actual_result["location_name"] == expected_result["location_name"]
         assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
         assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
         assert actual_result["coordinate_column"] == expected_result["coordinate_column"]

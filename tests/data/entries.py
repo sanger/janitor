@@ -40,7 +40,12 @@ class Entries:
             ],
             "users": [UsersTableEntry(id=1, login="user1")],
             "locations": [
-                LocationsTableEntry(id=1, barcode="unordered_location1", parentage="PARENT / unordered_location1")
+                LocationsTableEntry(
+                    id=1,
+                    barcode="unordered_location1",
+                    parentage="PARENT / unordered_location1",
+                    name="unordered_location1",
+                )
             ],
         }
 
@@ -53,6 +58,7 @@ class Entries:
                     labware_barcode="labware1",
                     location_barcode="unordered_location1",
                     full_location_address="PARENT / unordered_location1",
+                    location_name="unordered_location1",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -80,7 +86,9 @@ class Entries:
             ],
             "users": [UsersTableEntry(id=2, login="user2")],
             "locations": [
-                LocationsTableEntry(id=2, barcode="ordered_location2", parentage="PARENT / ordered_location2")
+                LocationsTableEntry(
+                    id=2, barcode="ordered_location2", parentage="PARENT / ordered_location2", name="ordered_location2"
+                )
             ],
             "coordinates": [CoordinatesTableEntry(id=2, position=1, row=1, column=1, location_id=2)],
         }
@@ -94,6 +102,7 @@ class Entries:
                     labware_barcode="labware2",
                     location_barcode="ordered_location2",
                     full_location_address="PARENT / ordered_location2",
+                    location_name="ordered_location2",
                     coordinate_position=1,
                     coordinate_row=1,
                     coordinate_column=1,
@@ -128,7 +137,12 @@ class Entries:
             ],
             "users": [UsersTableEntry(id=3, login="user3"), UsersTableEntry(id=4, login="user4")],
             "locations": [
-                LocationsTableEntry(id=3, barcode="unordered_location3", parentage="PARENT / unordered_location3")
+                LocationsTableEntry(
+                    id=3,
+                    barcode="unordered_location3",
+                    parentage="PARENT / unordered_location3",
+                    name="unordered_location3",
+                )
             ],
         }
 
@@ -141,6 +155,7 @@ class Entries:
                     labware_barcode="labware3",
                     location_barcode="unordered_location3",
                     full_location_address="PARENT / unordered_location3",
+                    location_name="unordered_location3",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -175,8 +190,18 @@ class Entries:
             ],
             "users": [UsersTableEntry(id=3, login="user3"), UsersTableEntry(id=4, login="user4")],
             "locations": [
-                LocationsTableEntry(id=3, barcode="unordered_location3", parentage="PARENT / unordered_location3"),
-                LocationsTableEntry(id=4, barcode="unordered_location4", parentage="PARENT / unordered_location4"),
+                LocationsTableEntry(
+                    id=3,
+                    barcode="unordered_location3",
+                    parentage="PARENT / unordered_location3",
+                    name="unordered_location3",
+                ),
+                LocationsTableEntry(
+                    id=4,
+                    barcode="unordered_location4",
+                    parentage="PARENT / unordered_location4",
+                    name="unordered_location4",
+                ),
             ],
             "labware_location": [
                 LabwareLocationTableEntry(
@@ -184,6 +209,7 @@ class Entries:
                     labware_barcode="labware4",
                     location_barcode="unordered_location3",
                     full_location_address="PARENT / unordered_location3",
+                    location_name="unordered_location3",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -205,6 +231,7 @@ class Entries:
                     labware_barcode="labware4",
                     location_barcode="unordered_location4",
                     full_location_address="PARENT / unordered_location4",
+                    location_name="unordered_location4",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -307,10 +334,27 @@ class Entries:
                 UsersTableEntry(id=7, login="user7"),
             ],
             "locations": [
-                LocationsTableEntry(id=1, barcode="unordered_location1", parentage="PARENT / unordered_location1"),
-                LocationsTableEntry(id=2, barcode="ordered_location2", parentage="PARENT / ordered_location2"),
-                LocationsTableEntry(id=3, barcode="unordered_location3", parentage="PARENT / unordered_location3"),
-                LocationsTableEntry(id=4, barcode="unordered_location4", parentage="PARENT / unordered_location4"),
+                LocationsTableEntry(
+                    id=1,
+                    barcode="unordered_location1",
+                    parentage="PARENT / unordered_location1",
+                    name="unordered_location1",
+                ),
+                LocationsTableEntry(
+                    id=2, barcode="ordered_location2", parentage="PARENT / ordered_location2", name="ordered_location2"
+                ),
+                LocationsTableEntry(
+                    id=3,
+                    barcode="unordered_location3",
+                    parentage="PARENT / unordered_location3",
+                    name="unordered_location3",
+                ),
+                LocationsTableEntry(
+                    id=4,
+                    barcode="unordered_location4",
+                    parentage="PARENT / unordered_location4",
+                    name="unordered_location4",
+                ),
             ],
             "coordinates": [CoordinatesTableEntry(id=2, position=1, row=1, column=1, location_id=2)],
         }
@@ -324,6 +368,7 @@ class Entries:
                     labware_barcode="labware1",
                     location_barcode="unordered_location1",
                     full_location_address="PARENT / unordered_location1",
+                    location_name="unordered_location1",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -338,6 +383,7 @@ class Entries:
                     labware_barcode="labware3",
                     location_barcode="ordered_location2",
                     full_location_address="PARENT / ordered_location2",
+                    location_name="ordered_location2",
                     coordinate_position=1,
                     coordinate_row=1,
                     coordinate_column=1,
@@ -352,6 +398,7 @@ class Entries:
                     labware_barcode="labware5",
                     location_barcode="unordered_location3",
                     full_location_address="PARENT / unordered_location3",
+                    location_name="unordered_location3",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
@@ -366,6 +413,7 @@ class Entries:
                     labware_barcode="labware7",
                     location_barcode="unordered_location4",
                     full_location_address="PARENT / unordered_location4",
+                    location_name="unordered_location4",
                     coordinate_position=None,
                     coordinate_row=None,
                     coordinate_column=None,
