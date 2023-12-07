@@ -10,8 +10,10 @@ labware_labwhere_columns = [
     "labware_barcode",
     "unordered_barcode",
     "unordered_full",
+    "unordered_name",
     "ordered_barcode",
     "ordered_full",
+    "ordered_name",
     "coordinate_position",
     "coordinate_row",
     "coordinate_column",
@@ -32,6 +34,7 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
     labware_barcode = entry["labware_barcode"]
     location_barcode = entry["unordered_barcode"]
     full_location_address = entry["unordered_full"]
+    location_name = entry["unordered_name"]
     coordinate_position = entry["coordinate_position"]
     coordinate_row = entry["coordinate_row"]
     coordinate_column = entry["coordinate_column"]
@@ -44,11 +47,13 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
     if entry["ordered_barcode"] is not None:
         location_barcode = entry["ordered_barcode"]
         full_location_address = entry["ordered_full"]
+        location_name = entry["ordered_name"]
 
     return {
         "labware_barcode": labware_barcode,
         "location_barcode": location_barcode,
         "full_location_address": full_location_address,
+        "location_name": location_name,
         "coordinate_position": coordinate_position,
         "coordinate_row": coordinate_row,
         "coordinate_column": coordinate_column,
