@@ -265,7 +265,12 @@ class Entries:
         return {
             "labwares": [LabwaresTableEntry(id=6, barcode="labware6", location_id=6, coordinate_id=None)],
             "locations": [
-                LocationsTableEntry(id=6, barcode="unordered_location6", parentage="PARENT / unordered_location6")
+                LocationsTableEntry(
+                    id=6,
+                    barcode="unordered_location6",
+                    parentage="PARENT / unordered_location6",
+                    name="unordered_location6",
+                )
             ],
         }
 
