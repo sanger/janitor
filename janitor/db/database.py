@@ -5,6 +5,7 @@ import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
 from mysql.connector.errors import DatabaseError
 
+from janitor.helpers.log_helpers import custom_log
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
 
@@ -28,7 +29,12 @@ class Database:
         if self._connection is not None:
             return self._connection
 
-        logger.info(f"Attempting to connect to {self.creds['host']} on port {self.creds['port']}...")
+        custom_log(
+            logger,
+            "info",
+            "DATABASE_CONNECTION",
+            f"Attempting to connect to {self.creds['host']} on port {self.creds['port']}...",
+        )
 
         try:
             connection = mysql.connect(
@@ -41,13 +47,15 @@ class Database:
             )
 
             if connection.is_connected():
-                logger.info(f"MySQL connection to {self.creds['db_name']} successful!")
+                custom_log(
+                    logger, "info", "DATABASE_CONNECTION", f"MySQL connection to {self.creds['db_name']} successful!"
+                )
                 self._connection = cast(MySQLConnectionAbstract, connection)
             else:
-                logger.error(f"MySQL connection to {self.creds['db_name']} failed!")
+                custom_log(logger, "error", "DATABASE_ERROR", f"MySQL connection to {self.creds['db_name']} failed!")
 
         except mysql.Error as e:
-            logger.error(f"Exception on connecting to MySQL database: {e}")
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on connecting to MySQL database: {e}")
 
         return self._connection
 
@@ -57,7 +65,7 @@ class Database:
             if self._connection is not None and self._connection.is_connected():
                 self._connection.close()
         except Exception as e:
-            logger.error(f"Exception on closing connection: {e}")
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on closing connection: {e}")
 
     def execute_query(self, query: str, params: Dict[str, str]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
@@ -73,16 +81,16 @@ class Database:
 
         if not self.connection:
             err = DatabaseError("Not connected to database!")
-            logger.error(f"Exception on executing query: {err}")
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on executing query: {err}")
             raise err
 
-        logger.info(f"Executing query: {query}")
+        custom_log(logger, "info", "DATABASE_QUERY", f"Executing query: {query}")
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(query, params)
                 results = cursor.fetchall()
-        except Exception as e:
-            logger.error(f"Exception on executing query: {e}")
+        except Exception as err:
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on executing query: {err}")
 
         return results
 
@@ -104,7 +112,7 @@ class Database:
 
         if not self.connection:
             err = DatabaseError("Not connected to database!")
-            logger.error(f"Exception on writing entries: {err}")
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on writing entries: {err}")
             raise err
 
         try:
@@ -116,5 +124,5 @@ class Database:
                     index += rows_per_query
 
             self.connection.commit()
-        except Exception as e:
-            logger.error(f"Exception on writing entries: {e}")
+        except Exception as err:
+            custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on writing entries: {err}")

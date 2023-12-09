@@ -2,15 +2,18 @@ from datetime import datetime
 from typing import Any, Sequence, cast
 
 from janitor.helpers.mysql_helpers import parse_entry
-from janitor.types import LabwareLabwhereEntry, LabwareMLWHEntry
+from janitor.types import LabwareLabwhereEntry, LabwareMLWHEntry, SampleSequenceMessage
 
+# labware_location
 labware_labwhere_columns = [
     "id",
     "labware_barcode",
     "unordered_barcode",
     "unordered_full",
+    "unordered_name",
     "ordered_barcode",
     "ordered_full",
+    "ordered_name",
     "coordinate_position",
     "coordinate_row",
     "coordinate_column",
@@ -31,6 +34,7 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
     labware_barcode = entry["labware_barcode"]
     location_barcode = entry["unordered_barcode"]
     full_location_address = entry["unordered_full"]
+    location_name = entry["unordered_name"]
     coordinate_position = entry["coordinate_position"]
     coordinate_row = entry["coordinate_row"]
     coordinate_column = entry["coordinate_column"]
@@ -43,11 +47,13 @@ def make_mlwh_entry(entry: LabwareLabwhereEntry) -> LabwareMLWHEntry:
     if entry["ordered_barcode"] is not None:
         location_barcode = entry["ordered_barcode"]
         full_location_address = entry["ordered_full"]
+        location_name = entry["ordered_name"]
 
     return {
         "labware_barcode": labware_barcode,
         "location_barcode": location_barcode,
         "full_location_address": full_location_address,
+        "location_name": location_name,
         "coordinate_position": coordinate_position,
         "coordinate_row": coordinate_row,
         "coordinate_column": coordinate_column,
@@ -85,3 +91,37 @@ def sort_results(
             mlwh_entries.append(make_mlwh_entry(cast(LabwareLabwhereEntry, result_dict)))
 
     return mlwh_entries, invalid_entries
+
+
+# sequencing_publisher
+run_status_columns = [
+    "change_date",
+    "id_run",
+    "sequencing_study",
+    "sample_supplier_id",
+    "labware_barcode",
+    "run_status",
+    "irods_root_collection",
+    "irods_data_relative_path",
+    "irods_secondary_data_relative_path",
+    "latest_timestamp",
+]
+
+
+def make_sample_sequence_message_dicts(entries: Sequence[Any]) -> Sequence[SampleSequenceMessage]:
+    """Parse entries into sample sequence messages.
+
+    Arguments:
+        entries {Sequence[Any]}: entries to parse
+
+    Returns:
+        sample_sequence_message_dicts {Sequence[SampleSequenceMessage]}: messages to publish to RabbitMQ
+    """
+    sample_sequence_message_dicts = []
+
+    for index in range(len(entries)):
+        message_dict = parse_entry(entries[index], run_status_columns)
+
+        sample_sequence_message_dicts.append(cast(SampleSequenceMessage, message_dict))
+
+    return sample_sequence_message_dicts
