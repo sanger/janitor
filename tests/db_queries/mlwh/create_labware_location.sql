@@ -4,6 +4,7 @@ CREATE TABLE labware_location
     labware_barcode varchar(255) NOT NULL UNIQUE,
     location_barcode varchar(255) NOT NULL,
     full_location_address varchar(255) NOT NULL,
+    location_name varchar(255) NOT NULL,
     coordinate_position int(11),
     coordinate_row int(11),
     coordinate_column int(11),
