@@ -1,3 +1,6 @@
+# Janitor tmp files
+*/tmp/*
+
 # Any files from SFTP
 data/*
 

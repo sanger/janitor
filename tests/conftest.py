@@ -1,15 +1,21 @@
 import logging.config
 from copy import deepcopy
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import PropertyMock, patch
 
 import pytest
 
 from janitor.db.database import Database
 from janitor.helpers.config_helpers import get_config
+from janitor.helpers.mysql_helpers import load_query
+from janitor.rabbitmq.rabbit import Rabbit
 from janitor.types import DbConnectionDetails
 
 CONFIG = get_config("janitor.config.test")
 logging.config.dictConfig(CONFIG.LOGGING)
+
+
+DB_QUERIES_FOLDERPATH = Path("tests/db_queries")
 
 
 @pytest.fixture
@@ -61,6 +67,31 @@ def mlwh_creds(config):
 
 
 @pytest.fixture
+def mlwh_events_database(mlwh_events_creds):
+    try:
+        # Create the database if it doesn't exist
+        creds_without_database = deepcopy(mlwh_events_creds)
+        creds_without_database["db_name"] = ""
+
+        new_sql_conn = Database(creds_without_database)
+        new_sql_conn.execute_query(f"CREATE DATABASE IF NOT EXISTS {mlwh_events_creds['db_name']}", {})
+    finally:
+        new_sql_conn.close()
+
+    try:
+        mysql_conn = Database(mlwh_events_creds)
+        clear_mlwh_events_tables(mysql_conn)
+        yield mysql_conn
+    finally:
+        mysql_conn.close()
+
+
+@pytest.fixture
+def mlwh_events_creds(config):
+    return config.MLWH_EVENTS_DB
+
+
+@pytest.fixture
 def lw_database(lw_creds):
     try:
         # Create the database if it doesn't exist
@@ -91,70 +122,45 @@ def lw_creds(config):
     )
 
 
+@pytest.fixture
+def mock_rabbit(config):
+    with patch("janitor.rabbitmq.rabbit.Rabbit.connection", new_callable=PropertyMock) as mock_connection:
+        mock_rabbit = Rabbit(config)
+        mock_rabbit._connection = mock_connection
+        yield mock_rabbit
+
+
+def recreate_all_tables(db, db_name, table_names):
+    db.execute_query(load_query(DB_QUERIES_FOLDERPATH / db_name / "drop_tables.sql"), {})
+
+    for table in table_names:
+        db.execute_query(load_query(DB_QUERIES_FOLDERPATH / db_name / f"create_{table}.sql"), {})
+
+
 def clear_lw_tables(lw_database):
-    # Labwares table
-    drop_table_query = "DROP TABLE IF EXISTS labwares;"
-    lw_database.execute_query(drop_table_query, {})
-
-    labwares_cols = "id int(11) primary key, barcode varchar(255), location_id int(11), coordinate_id int(11)"
-    create_table_query = f"CREATE TABLE labwares ({labwares_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Audits table
-    drop_table_query = "DROP TABLE IF EXISTS audits;"
-    lw_database.execute_query(drop_table_query, {})
-
-    audits_cols = """
-    id int(11) primary key, auditable_id int(11), auditable_type varchar(255), user_id int(11), updated_at datetime(6)
-    """
-    create_table_query = f"CREATE TABLE audits ({audits_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Users table
-    drop_table_query = "DROP TABLE IF EXISTS users;"
-    lw_database.execute_query(drop_table_query, {})
-
-    users_cols = "id int(11) primary key, login varchar(255)"
-    create_table_query = f"CREATE TABLE users ({users_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Locations table
-    drop_table_query = "DROP TABLE IF EXISTS locations;"
-    lw_database.execute_query(drop_table_query, {})
-
-    locations_cols = "id int(11) primary key, barcode varchar(255), parentage varchar(255)"
-    create_table_query = f"CREATE TABLE locations ({locations_cols});"
-    lw_database.execute_query(create_table_query, {})
-
-    # Coordinates table
-    drop_table_query = "DROP TABLE IF EXISTS coordinates;"
-    lw_database.execute_query(drop_table_query, {})
-
-    coordinates_cols = (
-        "id int(11) primary key, `position` int(11), `row` int(11), `column` int(11), location_id int(11)"
-    )
-    create_table_query = f"CREATE TABLE coordinates ({coordinates_cols});"
-    lw_database.execute_query(create_table_query, {})
+    table_names = ["audits", "coordinates", "labwares", "locations", "users"]
+    recreate_all_tables(lw_database, "lw", table_names)
 
 
 def clear_mlwh_tables(mlwh_database):
-    # Labware location table
-    drop_table_query = "DROP TABLE IF EXISTS labware_location;"
-    mlwh_database.execute_query(drop_table_query, {})
+    table_names = [
+        "labware_location",
+        "iseq_flowcell",
+        "iseq_product_metrics",
+        "iseq_run_status",
+        "sample",
+        "seq_product_irods_locations",
+        "study",
+    ]
+    recreate_all_tables(mlwh_database, "mlwh", table_names)
 
-    labware_location_cols = """
-        id int(11) primary key NOT NULL AUTO_INCREMENT,
-        labware_barcode varchar(255) NOT NULL UNIQUE,
-        location_barcode varchar(255) NOT NULL,
-        full_location_address varchar(255) NOT NULL,
-        coordinate_position int(11),
-        coordinate_row int(11),
-        coordinate_column int(11),
-        lims_id varchar(255) NOT NULL,
-        stored_by varchar(255) NOT NULL,
-        stored_at datetime(6) NOT NULL,
-        created_at datetime(6) NOT NULL,
-        updated_at datetime(6) NOT NULL
-    """
-    create_table_query = f"CREATE TABLE labware_location ({labware_location_cols});"
-    mlwh_database.execute_query(create_table_query, {})
+
+def clear_mlwh_events_tables(mlwh_events_database):
+    table_names = [
+        "events",
+        "event_types",
+        "roles",
+        "role_types",
+        "subjects",
+    ]
+    recreate_all_tables(mlwh_events_database, "mlwh_events", table_names)

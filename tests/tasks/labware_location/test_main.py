@@ -22,6 +22,7 @@ labware_location_columns = [
     "labware_barcode",
     "location_barcode",
     "full_location_address",
+    "location_name",
     "coordinate_position",
     "coordinate_row",
     "coordinate_column",
@@ -75,7 +76,7 @@ def write_to_tables(
         lw_database.write_entries_to_table(insert_into_table_query, users_entries, len(users_entries))
 
     if locations_entries:
-        insert_into_table_query = "INSERT INTO locations (id, barcode, parentage) VALUES (%s, %s, %s);"
+        insert_into_table_query = "INSERT INTO locations (id, barcode, parentage, name) VALUES (%s, %s, %s, %s);"
         lw_database.write_entries_to_table(insert_into_table_query, locations_entries, len(locations_entries))
 
     if coordinates_entries:
@@ -92,6 +93,7 @@ def write_to_tables(
                     labware_barcode,
                     location_barcode,
                     full_location_address,
+                    location_name,
                     coordinate_position,
                     coordinate_row,
                     coordinate_column,
@@ -100,7 +102,7 @@ def write_to_tables(
                     stored_at,
                     created_at,
                     updated_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         mlwh_database.write_entries_to_table(
             insert_into_table_query, labware_location_entries, len(labware_location_entries)
         )
@@ -112,10 +114,12 @@ def test_given_valid_db_details_when_connecting_to_db_then_check_connection_succ
     sync_changes_from_labwhere(config)
 
     assert mock_info.has_calls(
-        call(f"Attempting to connect to {config.LABWHERE_DB['host']} on port {config.LABWHERE_DB['host']}..."),
-        call(f"MySQL connection to {config.LABWHERE_DB['db_name']} successful!"),
-        call(f"Attempting to connect to {config.MLWH_DB['host']} on port {config.MLWH_DB['host']}..."),
-        call(f"MySQL connection to {config.MLWH_DB['db_name']} successful!"),
+        [
+            call("[DATABASE_CONNECTION]"),
+            call("[DATABASE_CONNECTION]"),
+            call("[DATABASE_CONNECTION]"),
+            call("[DATABASE_CONNECTION]"),
+        ]
     )
 
 
@@ -123,24 +127,20 @@ def test_given_valid_connection_and_deleting_db_when_attempting_sync_then_check_
     mock_error, config, mlwh_database
 ):
     mlwh_database.execute_query(f"DROP DATABASE {config.MLWH_DB['db_name']}", {})
-    with pytest.raises(DatabaseError) as error:
+    with pytest.raises(DatabaseError):
         sync_changes_from_labwhere(config)
 
-    assert mock_error.has_calls(
-        call(f"Exception on querying labware_location: {error}"),
-    )
+    assert mock_error.has_calls([call("[TASK_EXCEPTION]")])
 
 
 def test_given_valid_connection_and_deleting_labware_location_table_when_attempting_sync_then_check_exception_raised(
     mock_error, config, mlwh_database
 ):
     mlwh_database.execute_query("DROP TABLE labware_location", {})
-    with pytest.raises(IndexError) as error:
+    with pytest.raises(IndexError):
         sync_changes_from_labwhere(config)
 
-    assert mock_error.has_calls(
-        call(f"Exception on querying labware_location: {error}"),
-    )
+    assert mock_error.has_calls([call("[TASK_EXCEPTION]")])
 
 
 def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_entry_written_correctly(
@@ -164,6 +164,7 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -173,12 +174,7 @@ def test_given_good_input_entry_with_location_when_making_mlwh_entry_then_check_
     assert actual_result["created_at"] == expected_result["created_at"]
     assert actual_result["updated_at"] == expected_result["updated_at"]
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 1 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.call_count == 0
 
@@ -205,6 +201,7 @@ def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_che
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -214,12 +211,7 @@ def test_given_good_input_entry_with_coordinates_when_making_mlwh_entry_then_che
     assert actual_result["created_at"] == expected_result["created_at"]
     assert actual_result["updated_at"] == expected_result["updated_at"]
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 1 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.call_count == 0
 
@@ -245,6 +237,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -254,12 +247,7 @@ def test_given_good_input_entry_with_two_audits_when_making_mlwh_entry_then_chec
     assert actual_result["created_at"] == expected_result["created_at"]
     assert actual_result["updated_at"] == expected_result["updated_at"]
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 1 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.call_count == 0
 
@@ -286,6 +274,7 @@ def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_th
     assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
     assert actual_result["location_barcode"] == expected_result["location_barcode"]
     assert actual_result["full_location_address"] == expected_result["full_location_address"]
+    assert actual_result["location_name"] == expected_result["location_name"]
     assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
     assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
     assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -295,12 +284,7 @@ def test_given_good_input_entry_outdated_record_in_mlwh_when_checking_entries_th
     assert actual_result["created_at"] == expected_result["created_at"]
     assert actual_result["updated_at"] == expected_result["updated_at"]
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 1 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.call_count == 0
 
@@ -317,15 +301,13 @@ def test_given_bad_input_entry_without_location_when_making_sorting_entries_then
     )
     sync_changes_from_labwhere(config)
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 0 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.has_calls(
-        call(f"Found invalid entry: {test_entries.bad_input_entry_without_location_input['labwares'][0]}")
+        [
+            call("TASK_ERROR"),
+            call(f"Found invalid entry: {test_entries.bad_input_entry_without_location_input['labwares'][0]}"),
+        ]
     )
 
 
@@ -340,15 +322,13 @@ def test_given_bad_input_entry_without_audits_when_sorting_entries_then_check_en
     )
     sync_changes_from_labwhere(config)
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 0 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.has_calls(
-        call(f"Found invalid entry: {test_entries.bad_input_entry_without_audits_input['labwares'][0]}")
+        [
+            call("TASK_ERROR"),
+            call(f"Found invalid entry: {test_entries.bad_input_entry_without_audits_input['labwares'][0]}"),
+        ]
     )
 
 
@@ -362,18 +342,11 @@ def test_given_bad_input_entry_without_location_without_audits_when_sorting_entr
     )
     sync_changes_from_labwhere(config)
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 0 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    bad_entry = test_entries.bad_input_entry_without_location_without_audits_input["labwares"][0]
 
-    assert mock_error.has_calls(
-        call(
-            f"Found invalid entry: {test_entries.bad_input_entry_without_location_without_audits_input['labwares'][0]}"
-        )
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
+
+    assert mock_error.has_calls([call("TASK_ERROR"), call(f"Found invalid entry: {bad_entry}")])
 
 
 def test_given_mixed_entries_when_writing_entries_then_check_all_entries_processed_correctly(
@@ -399,6 +372,7 @@ def test_given_mixed_entries_when_writing_entries_then_check_all_entries_process
         assert actual_result["labware_barcode"] == expected_result["labware_barcode"]
         assert actual_result["location_barcode"] == expected_result["location_barcode"]
         assert actual_result["full_location_address"] == expected_result["full_location_address"]
+        assert actual_result["location_name"] == expected_result["location_name"]
         assert actual_result["coordinate_position"] == expected_result["coordinate_position"]
         assert actual_result["coordinate_row"] == expected_result["coordinate_row"]
         assert actual_result["coordinate_column"] == expected_result["coordinate_column"]
@@ -408,15 +382,15 @@ def test_given_mixed_entries_when_writing_entries_then_check_all_entries_process
         assert actual_result["created_at"] == expected_result["created_at"]
         assert actual_result["updated_at"] == expected_result["updated_at"]
 
-    assert mock_info.has_calls(
-        call("Starting sync labware locations task..."),
-        call("Updating 4 rows..."),
-        call("Closing connections to databases..."),
-        call("Task successful!"),
-    )
+    assert mock_info.has_calls([call("TASK_START"), call("TASK_PROGRESS"), call("TASK_PROGRESS"), call("TASK_SUCCESS")])
 
     assert mock_error.has_calls(
-        call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][1]}"),
-        call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][3]}"),
-        call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][5]}"),
+        [
+            call("TASK_ERROR"),
+            call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][1]}"),
+            call("TASK_ERROR"),
+            call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][3]}"),
+            call("TASK_ERROR"),
+            call(f"Found invalid entry: {test_entries.mixed_entries_input['labwares'][5]}"),
+        ]
     )
