@@ -67,12 +67,12 @@ class Database:
         except Exception as e:
             custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on closing connection: {e}")
 
-    def execute_query(self, query: str, params: Dict[str, str]) -> Sequence[Any]:
+    def execute_query(self, query: str, params: Dict[str, Any]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
 
         Arguments:
             query {str}: SQL query to execute against table
-            params {Dict[str, str]}: Additional parameters to inject to SQL query
+            params {Dict[str, Any]}: Additional parameters to inject to SQL query
 
         Returns:
             results {Sequence[Any]}: list of queried results
