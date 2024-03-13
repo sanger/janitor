@@ -5,6 +5,11 @@ import mysql.connector as mysql
 from mysql.connector.connection_cext import MySQLConnectionAbstract
 from mysql.connector.errors import DatabaseError
 
+# mysql-connector-python-8.3.0-src/mysql-connector-python/lib/mysql/connector/cursor.py
+# BinaryProtocolType = Union[Decimal, bytes, date, datetime, float, int, str, time, timedelta, None]
+# MySQLConvertibleType = Union[BinaryProtocolType, bool, struct_time]
+from mysql.connector.types import MySQLConvertibleType
+
 from janitor.helpers.log_helpers import custom_log
 from janitor.helpers.mysql_helpers import list_of_entries_values
 from janitor.types import DbConnectionDetails
@@ -67,12 +72,12 @@ class Database:
         except Exception as e:
             custom_log(logger, "error", "DATABASE_EXCEPTION", f"Exception on closing connection: {e}")
 
-    def execute_query(self, query: str, params: Mapping[str, Any]) -> Sequence[Any]:
+    def execute_query(self, query: str, params: Dict[str, MySQLConvertibleType]) -> Sequence[Any]:
         """Execute an SQL query and return the results and column names.
 
         Arguments:
             query {str}: SQL query to execute against table
-            params {Mapping[str, Any]}: Additional parameters to inject to SQL query
+            params {Dict[str, Any]}: Additional parameters to inject to SQL query
 
         Returns:
             results {Sequence[Any]}: list of queried results
