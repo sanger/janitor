@@ -77,7 +77,7 @@ class Database:
 
         Arguments:
             query {str}: SQL query to execute against table
-            params {Dict[str, Any]}: Additional parameters to inject to SQL query
+            params {Dict[str, MySQLConvertibleType]}: Additional parameters to inject to SQL query
 
         Returns:
             results {Sequence[Any]}: list of queried results
