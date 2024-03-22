@@ -1,0 +1,56 @@
+{
+    "namespace": "uk.ac.sanger.psd",
+    "type": "record",
+    "name": "SampleSequenceStatus",
+    "doc": "A message describing the status of a sample sequencing run.",
+    "fields": [
+        {
+            "name": "change_date",
+            "doc": "The date of the status change.",
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
+        },
+        {
+            "name": "id_run",
+            "doc": "ID for a given sequencing run.",
+            "type": "int"
+        },
+        {
+            "name": "sequencing_study",
+            "doc": "Name of the study the sample was sequenced under.",
+            "type": "string"
+        },
+        {
+            "name": "sample_supplier_id",
+            "doc": "ID for sample as supplied on manifest to SeqOps.",
+            "type": "string"
+        },
+        {
+            "name": "labware_barcode",
+            "doc": "Plate or tube barcode that sample was supplied to SeqOps on.",
+            "type": "string"
+        },
+        {
+            "name": "run_status",
+            "doc": "ID of run status.",
+            "type": "int"
+        },
+        {
+            "name": "irods_root_collection",
+            "doc": "Root collection for irods path. From seq_product_irods_locations table. May be empty.",
+            "type": ["null", "string"]
+        },
+        {
+            "name": "irods_data_relative_path",
+            "doc": "Relative path to data in irods. From seq_product_irods_locations table. May be empty.",
+            "type": ["null", "string"]
+        },
+        {
+            "name": "irods_secondary_data_relative_path",
+            "doc": "Secondary relative path to data in irods. From seq_product_irods_locations table. May be empty.",
+            "type": ["null", "string"]
+        }
+    ]
+}
