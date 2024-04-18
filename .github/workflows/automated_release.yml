@@ -90,4 +90,4 @@ jobs:
           org-name: sanger
           keep-at-least: 5
           skip-tags: latest, *[!develop] # This will DELETE any images where the tag contains ANY characters in "develop", excluding '!'
-          token: ${{ secrets.ADD_TO_PROJECT_PAT_ORG_WIDE }} #
+          token: ${{ secrets.REMOVE_OLD_IMAGES }}
