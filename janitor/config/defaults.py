@@ -54,3 +54,5 @@ SEQUENCING_PUBLISHER_RUN_STATUS_QUERY = "./janitor/tasks/sequencing_publisher/sq
 
 RABBITMQ_SEQUENCING_EXCHANGE = "sanger.psd.sample_status.uat"
 RABBITMQ_SEQUENCING_MESSAGE_SCHEMA = "janitor/tasks/sequencing_publisher/message_schemas/sample_sequence_status.avsc"
+
+JOB_ENABLED = True
