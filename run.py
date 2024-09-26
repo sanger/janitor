@@ -30,7 +30,7 @@ if __name__ == "__main__":
     )
 
     try:
-        if config.JOB_ENABLED:
+        if bool(config.JOB_ENABLED):
             sched.start()
         else:
             custom_log(logger, "info", "TASK_DISABLED", "Job not running as it is disabled")
