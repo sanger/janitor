@@ -12,8 +12,6 @@ load_dotenv()
 config = get_config()
 logging.config.dictConfig(config.LOGGING)
 
-logger = logging.getLogger(__name__)
-
 if __name__ == "__main__":
     sched = BlockingScheduler()
 
