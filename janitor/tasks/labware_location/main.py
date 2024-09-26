@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def sync_changes_from_labwhere(config):
+    if not bool(config.JOB_ENABLED):
+        custom_log(logger, "info", "TASK_START", "Not starting because the job is disabled")
+        return
     start = time.time()
     custom_log(logger, "info", "TASK_START", "Starting sync labware locations task...")
     db_labwhere = Database(config.LABWHERE_DB)
