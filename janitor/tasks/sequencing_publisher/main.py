@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_and_publish_sequencing_run_status_changes(config):
-    if not bool(config.JOB_ENABLED):
+    if config.JOB_ENABLED == "false":
         custom_log(logger, "info", "TASK_START", "Not starting because the job is disabled")
         return
 
