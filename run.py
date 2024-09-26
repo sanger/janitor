@@ -4,7 +4,6 @@ from apscheduler.schedulers.background import BlockingScheduler
 from dotenv import load_dotenv
 
 from janitor.helpers.config_helpers import get_config
-from janitor.helpers.log_helpers import custom_log
 from janitor.tasks.labware_location.main import sync_changes_from_labwhere
 from janitor.tasks.sequencing_publisher.main import get_and_publish_sequencing_run_status_changes
 
@@ -30,10 +29,6 @@ if __name__ == "__main__":
     )
 
     try:
-        custom_log(logger, "info", "TASK_DISABLED", f"Job enabled: {config.JOB_ENABLED}")
-        if bool(config.JOB_ENABLED):
-            sched.start()
-        else:
-            custom_log(logger, "info", "TASK_DISABLED", "Job not running as it is disabled")
+        sched.start()
     except (KeyboardInterrupt, SystemExit):
         pass
