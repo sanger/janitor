@@ -129,6 +129,10 @@ The messages are sent in groups where each individual message corresponds to a r
 **Note:** If an error occurs when messages are being published to RabbitMQ, the earliest timestamp from the group of messages which failed to publish is saved.
 This timestamp is used to retrieve changes when the job is ran next which means that there may be duplicate messages published to consumers but using the timestamp this way minimises the number of duplicate messages.
 
+### Note on Job Configurations
+
+The configuration `SEQUENCING_RUN_CHANGES_JOB_ENABLED` decides whether the sequencing job runs or not. This can be set through each environment's Janitor app config in the `deployment` project.
+
 ## Updating the Table of Contents
 
 Node is required to run npx:
