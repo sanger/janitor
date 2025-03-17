@@ -6,6 +6,7 @@ on:
     branches:
       - main
 
+      
 jobs:
   check-release-verion:
     uses: sanger/.github/.github/workflows/check-release-version.yml@master
