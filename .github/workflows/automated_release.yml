@@ -81,13 +81,14 @@ jobs:
           docker push docker.pkg.github.com/${IMAGE_NAME}:${{ env.RELEASE_TAG }}
 
       - name: Remove old releases
-        uses: snok/container-retention-policy@v2
+        uses: snok/container-retention-policy@v3.1.0
         with:
-          image-names: ${{ github.event.repository.name }}/*
-          cut-off: Four months ago UTC
-          timestamp-to-use: updated_at
-          account-type: org
-          org-name: sanger
-          keep-at-least: 5
-          skip-tags: latest, *[!develop] # This will DELETE any images where the tag contains ANY characters in "develop", excluding '!'
+          account: sanger
           token: ${{ secrets.REMOVE_OLD_IMAGES }}
+          image-names: ${{ github.event.repository.name }}/*
+          image-tags: "!latest" # never delete the `latest` tag
+          tag-selection: both
+          cut-off: 4months
+          timestamp-to-use: updated_at
+          keep-n-most-recent: 5 # always keep the 5 most recent tagged versions per image
+          dry-run: false
