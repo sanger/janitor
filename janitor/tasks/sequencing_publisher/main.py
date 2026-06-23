@@ -12,7 +12,7 @@ from janitor.rabbitmq.rabbit import Rabbit
 logger = logging.getLogger(__name__)
 
 
-def _format_run_status_query(config) -> str:
+def _format_run_status_query(config: Any) -> str:
     query_template = load_query(config.SEQUENCING_PUBLISHER_RUN_STATUS_QUERY)
 
     # Quote schema names to avoid SQL syntax issues when names include special characters.
