@@ -12,6 +12,16 @@ from janitor.rabbitmq.rabbit import Rabbit
 logger = logging.getLogger(__name__)
 
 
+def _format_run_status_query(config) -> str:
+    query_template = load_query(config.SEQUENCING_PUBLISHER_RUN_STATUS_QUERY)
+
+    # Quote schema names to avoid SQL syntax issues when names include special characters.
+    mlwh_db_name = f"`{config.MLWH_DB['db_name']}`"
+    mlwh_events_db_name = f"`{config.MLWH_EVENTS_DB['db_name']}`"
+
+    return query_template.format(mlwh_db=mlwh_db_name, mlwh_events_db=mlwh_events_db_name)
+
+
 def get_and_publish_sequencing_run_status_changes(config):
     if not config.SEQUENCING_RUN_CHANGES_JOB_ENABLED:
         custom_log(logger, "info", "TASK_START", "Not starting because the job is disabled")
@@ -25,7 +35,7 @@ def get_and_publish_sequencing_run_status_changes(config):
     # Get sample sequence run changes
     db_mlwh = Database(config.MLWH_DB)
 
-    GET_RUN_STATUS_CHANGES_QUERY = load_query(config.SEQUENCING_PUBLISHER_RUN_STATUS_QUERY)
+    GET_RUN_STATUS_CHANGES_QUERY = _format_run_status_query(config)
 
     run_status_changes: Sequence[Any] = []
 
