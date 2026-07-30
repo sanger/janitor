@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 apscheduler = "~=3.11"
-mysql-connector-python = "~=9.7"
+mysql-connector-python = "~=26.7"
 python-dotenv = "~=1.2"
 pika = "~=1.4"
 fastavro = "==1.12.2"
