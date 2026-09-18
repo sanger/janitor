@@ -10,13 +10,13 @@ SELECT
     GROUP_CONCAT(irods.irods_data_relative_path ORDER BY irods.irods_data_relative_path SEPARATOR ';' ) AS irods_data_relative_paths,
     GROUP_CONCAT(irods.irods_secondary_data_relative_path ORDER BY irods.irods_secondary_data_relative_path SEPARATOR ';')  AS irods_secondary_data_relative_paths,
     e.occured_at AS latest_timestamp
-FROM janitor_tests_mlwh.iseq_flowcell AS flowcell
+FROM {mlwh_db}.iseq_flowcell AS flowcell
 -- join to sequencing tables, sequencing study and sample table
 JOIN (
-    janitor_tests_mlwh.iseq_product_metrics AS product_metrics,
-    janitor_tests_mlwh.sample,
-    janitor_tests_mlwh.study,
-    janitor_tests_mlwh.iseq_run_status AS run_status
+    {mlwh_db}.iseq_product_metrics AS product_metrics,
+    {mlwh_db}.sample,
+    {mlwh_db}.study,
+    {mlwh_db}.iseq_run_status AS run_status
 )
 
 ON (
@@ -35,13 +35,13 @@ LEFT JOIN (
     SELECT
         sample_subject.uuid AS sample_uuid,
         MAX(e2.id) AS manifest_update_event_id
-    FROM janitor_tests_mlwh_events.event_types et2
-    JOIN janitor_tests_mlwh_events.events e2 ON (e2.event_type_id=et2.id)
+    FROM {mlwh_events_db}.event_types et2
+    JOIN {mlwh_events_db}.events e2 ON (e2.event_type_id=et2.id)
 
     -- JOIN ON sample subject/roles
-    JOIN janitor_tests_mlwh_events.roles sample_role ON (sample_role.event_id=e2.id)
-    JOIN janitor_tests_mlwh_events.role_types sample_role_rt ON (sample_role.role_type_id=sample_role_rt.id)
-    JOIN janitor_tests_mlwh_events.subjects sample_subject ON (sample_role.subject_id=sample_subject.id)
+    JOIN {mlwh_events_db}.roles sample_role ON (sample_role.event_id=e2.id)
+    JOIN {mlwh_events_db}.role_types sample_role_rt ON (sample_role.role_type_id=sample_role_rt.id)
+    JOIN {mlwh_events_db}.subjects sample_subject ON (sample_role.subject_id=sample_subject.id)
 
     WHERE
         e2.occured_at >= %(latest_timestamp)s -- prevent querying data too old to be relevant
@@ -52,12 +52,12 @@ LEFT JOIN (
 ON sample.uuid_sample_lims=last_sample_manifest_updated_event.sample_uuid
 
 -- join to last manifest update event
-JOIN janitor_tests_mlwh_events.events e ON (e.id=last_sample_manifest_updated_event.manifest_update_event_id)
+JOIN {mlwh_events_db}.events e ON (e.id=last_sample_manifest_updated_event.manifest_update_event_id)
 
 -- JOIN ON labware subject on manifest update event
-JOIN janitor_tests_mlwh_events.roles labware_role ON (labware_role.event_id=last_sample_manifest_updated_event.manifest_update_event_id)
-JOIN janitor_tests_mlwh_events.role_types labware_role_rt ON (labware_role.role_type_id=labware_role_rt.id)
-JOIN janitor_tests_mlwh_events.subjects labware_subject ON (labware_role.subject_id=labware_subject.id)
+JOIN {mlwh_events_db}.roles labware_role ON (labware_role.event_id=last_sample_manifest_updated_event.manifest_update_event_id)
+JOIN {mlwh_events_db}.role_types labware_role_rt ON (labware_role.role_type_id=labware_role_rt.id)
+JOIN {mlwh_events_db}.subjects labware_subject ON (labware_role.subject_id=labware_subject.id)
 
 WHERE
     e.occured_at >= %(latest_timestamp)s -- prevent querying data too old to be relevant
