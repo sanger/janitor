@@ -1,12 +1,11 @@
-# Use bullseye for a smaller image size and install only the required packages.
-# Bookworm is available but at the time of writing is 5 days old.
-FROM python:3.10-slim-bullseye
+# Use bookworm for a smaller image size and install only the required packages.
+FROM python:3.10-slim-bookworm
 
 # > Setting PYTHONUNBUFFERED to a non empty value ensures that the python output is sent straight to
 # > terminal (e.g. your container log) without being first buffered and that you can see the output
 # > of your application (e.g. django logs) in real time.
 # https://stackoverflow.com/a/59812588
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Install required libs
 RUN apt-get update && \
